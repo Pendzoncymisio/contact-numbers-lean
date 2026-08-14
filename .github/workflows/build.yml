@@ -13,37 +13,39 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # mathlib's oleans are ~5.9 GB and this project's are ~4.3 GB, against the
-      # ~14 GB free on a stock runner. Reclaim the preinstalled toolchains.
-      - name: Free disk space
+      # The first CI attempt died at 77 minutes with the runner killed and no logs
+      # uploaded. Disk was never the issue (the runner has ~87 GB free); memory is
+      # the constraint: 15 GiB against Lake's default of one job per core, on modules
+      # whose oleans reach 348 MB. So bound the job count and add headroom.
+      - name: Add swap headroom
         run: |
-          df -h /
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
-                      /usr/local/share/boost /usr/share/swift \
-                      /opt/hostedtoolcache/CodeQL "$AGENT_TOOLSDIRECTORY" || true
-          sudo apt-get clean
-          echo "--- after ---"; df -h /
-
-      # Individual modules hold large environments; give the kernel headroom.
-      - name: Add swap
-        run: |
-          sudo fallocate -l 8G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
+          sudo fallocate -l 16G /swapfile2
+          sudo chmod 600 /swapfile2
+          sudo mkswap /swapfile2
+          sudo swapon /swapfile2
           free -h
 
-      - name: Build the project
-        uses: leanprover/lean-action@v1
-        with:
-          use-mathlib-cache: true
+      - name: Install elan
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Fetch the mathlib cache
+        run: lake exe cache get
+
+      # Lake takes its job count from the visible CPU count and this Lake version has
+      # no --jobs flag, so restrict CPU affinity to two cores. Slower, but it halves
+      # the number of Lean processes holding a large environment at once.
+      - name: Build
+        run: taskset -c 0,1 lake build
 
       - name: Disk and memory after build
         if: always()
         run: |
           df -h /
           free -h
-          du -sh .lake/build 2>/dev/null || true
+          du -sh .lake/build || true
 
       - name: Check the trust base
         run: |
