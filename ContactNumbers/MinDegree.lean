@@ -62,7 +62,7 @@ theorem minDegree_six {X : Finset E3} (h6 : X.card = 6)
     (hcc : 24 ≤ contactCount X) : ∀ v ∈ X, 3 ≤ (neighbors X v).card := by
   intro v hv
   by_contra hlt
-  push_neg at hlt
+  push Not at hlt
   have herase := contactCount_erase (X := X) (v := v) hv
   have hcard : (X.erase v).card = 5 := by rw [Finset.card_erase_of_mem hv, h6]
   have hbound := five_particle_bound hcard
@@ -73,7 +73,7 @@ theorem minDegree_seven {X : Finset E3} (hX : HardCore X) (h7 : X.card = 7)
     (hcc : 30 ≤ contactCount X) : ∀ v ∈ X, 3 ≤ (neighbors X v).card := by
   intro v hv
   by_contra hlt
-  push_neg at hlt
+  push Not at hlt
   have herase := contactCount_erase (X := X) (v := v) hv
   have hcard : (X.erase v).card = 6 := by rw [Finset.card_erase_of_mem hv, h7]
   have hbound := six_particle_bound (erase_hardCore hX v) hcard
@@ -84,7 +84,7 @@ theorem minDegree_eight {X : Finset E3} (hX : HardCore X) (h8 : X.card = 8)
     (hcc : 36 ≤ contactCount X) : ∀ v ∈ X, 3 ≤ (neighbors X v).card := by
   intro v hv
   by_contra hlt
-  push_neg at hlt
+  push Not at hlt
   have herase := contactCount_erase (X := X) (v := v) hv
   have hcard : (X.erase v).card = 7 := by rw [Finset.card_erase_of_mem hv, h8]
   have hbound := seven_particle_bound (erase_hardCore hX v) hcard
@@ -96,7 +96,7 @@ theorem minDegree_nine {X : Finset E3} (hX : HardCore X) (h9 : X.card = 9)
     (hcc : 42 ≤ contactCount X) : ∀ v ∈ X, 3 ≤ (neighbors X v).card := by
   intro v hv
   by_contra hlt
-  push_neg at hlt
+  push Not at hlt
   have herase := contactCount_erase (X := X) (v := v) hv
   have hcard : (X.erase v).card = 8 := by rw [Finset.card_erase_of_mem hv, h9]
   have hbound := eight_particle_bound (erase_hardCore hX v) hcard

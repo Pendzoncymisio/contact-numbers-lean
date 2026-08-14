@@ -1,0 +1,21 @@
+name: lean-setup
+description: Install elan, add swap headroom, and fetch the mathlib cache.
+runs:
+  using: composite
+  steps:
+    - name: Add swap headroom
+      shell: bash
+      run: |
+        sudo fallocate -l 16G /swapfile2
+        sudo chmod 600 /swapfile2
+        sudo mkswap /swapfile2
+        sudo swapon /swapfile2
+    - name: Install elan
+      shell: bash
+      run: |
+        curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+          | sh -s -- -y --default-toolchain none
+        echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+    - name: Fetch the mathlib cache
+      shell: bash
+      run: lake exe cache get

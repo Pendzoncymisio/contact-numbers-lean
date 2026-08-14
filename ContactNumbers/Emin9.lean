@@ -40,7 +40,7 @@ theorem degree_ge_four_9 {X : Finset E3} (hX : HardCore X) (h9 : X.card = 9)
     (hcc : 43 ≤ contactCount X) : ∀ v ∈ X, 4 ≤ (neighbors X v).card := by
   intro v hv
   by_contra hlt
-  push_neg at hlt
+  push Not at hlt
   have herase := contactCount_erase (X := X) (v := v) hv
   have hY : (X.erase v).card = 8 := by rw [Finset.card_erase_of_mem hv, h9]
   have hXY : HardCore (X.erase v) := fun a ha b hb hab =>
@@ -363,7 +363,7 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 9 → E3}
     {es ns : List ℕ}
     (hes : ∀ i ∈ es, i < 36 ∧ dist (qf p (cPairFst i)) (qf p (cPairSnd i)) = 1)
     (hns : ∀ i ∈ ns, i < 36 ∧ ¬ dist (qf p (cPairFst i)) (qf p (cPairSnd i)) = 1)
-    (hesnd : es.Nodup) (hnsnd : ns.Nodup)
+    (_hesnd : es.Nodup) (hnsnd : ns.Nodup)
     {cert : ℕ} (hkill : checkCert es ns cert = true) : False := by
   -- particle-level helpers
   have hqmem : ∀ m : ℕ, qf p m ∈ X := fun m => hpmem _
@@ -1245,7 +1245,7 @@ theorem nine_particle_bound_of_tree {fuel : ℕ} {data : List ℕ}
     (htree : walk fuel data 0 [] [] = some [])
     {X : Finset E3} (hX : HardCore X) (h9 : X.card = 9) : contactCount X ≤ 42 := by
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   obtain ⟨m, hm⟩ := contactCount_even X
   have hcc : 43 ≤ contactCount X := by omega
   obtain ⟨p, hpinj, hXim, hmax⟩ := exists_lexmax_enum h9

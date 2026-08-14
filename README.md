@@ -84,10 +84,12 @@ lake exe cache get     # prebuilt mathlib oleans
 lake build
 ```
 
-On four cores of an AMD Ryzen 7 5700G this project takes a few hours on top of
-mathlib, dominated by the serialized search trees and the `Emin9Q28TreeS*` subdivision
-group. The CI run linked by the badge above builds it from scratch on a clean machine
-and is the reliable figure.
+On four cores of an AMD Ryzen 7 5700G a full build takes about five hours, dominated by
+the serialized search trees and the Positivstellensatz witnesses; `Emin9Q10.lean` alone
+takes roughly ninety minutes. This is longer than the six-hour ceiling on a single
+GitHub-hosted job once that machine's slower cores are accounted for, so CI builds in
+three chained stages that pass `.lake/build` along through the cache, with the trust-base
+check at the end of the last one.
 
 ## Checking what is assumed
 
@@ -140,9 +142,15 @@ noncomputable def energy (X : Finset E3) : ℝ := -(contactCount X : ℝ) / 2
 with `contactCount` counting *ordered* touching pairs. So `energy X = −contacts X`, and
 a ground state of `n` particles is a maximum-contact packing of `n` balls.
 `Interface.lean` restates everything in contact-number language, and it is those
-statements that the paper and `Axioms.lean` refer to. The core files were left under
-their original names rather than renamed, so that they remain diff-comparable with the
-development they were extracted from.
+statements that the paper and `Axioms.lean` refer to.
+
+The core files keep their original names rather than being renamed, so that they stay
+close to the development they were extracted from. The only edits applied during
+extraction are mechanical: deprecated tactics and lemmas updated for the pinned mathlib
+(`push_neg` to `push Not`, `Fin.coe_cast` to `Fin.val_cast`, `mul_le_mul_right'` to
+`mul_le_mul_left`), unused `simp` arguments dropped, unused binders underscored, and one
+local variable renamed off a deprecated global. None of these touches a statement, and
+the build is warning-free.
 
 ## What is not proved
 

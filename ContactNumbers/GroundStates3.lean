@@ -33,7 +33,7 @@ theorem pairwise_unit_card_le_four {S : Finset E3}
     (h : ∀ u ∈ S, ∀ v ∈ S, u ≠ v → dist u v = 1) : S.card ≤ 4 := by
   classical
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   obtain ⟨T, hTsub, hT5⟩ := Finset.exists_subset_card_eq (show 5 ≤ S.card from hcon)
   set e := T.equivFinOfCardEq hT5 with he
   set p : Fin 5 → E3 := fun i => ((e.symm i : T) : E3) with hp
@@ -170,7 +170,7 @@ theorem energy_ge_five_particles {X : Finset E3} (h5 : X.card = 5) :
   -- nineteen ordered contacts are impossible
   have hcc : contactCount X ≤ 18 := by
     by_contra hcon
-    push_neg at hcon
+    push Not at hcon
     have h19 : 19 ≤ contactCount X := hcon
     -- every particle would have to be fully bonded
     have hall : ∀ v ∈ X, (neighbors X v).card = 4 := by
@@ -764,14 +764,14 @@ theorem energy_ge_six_particles {X : Finset E3} (hX : HardCore X) (h6 : X.card =
       _ = 5 := by rw [Finset.card_erase_of_mem hv, h6]
   have hcc : contactCount X ≤ 24 := by
     by_contra hcon
-    push_neg at hcon
+    push Not at hcon
     have h26 : 26 ≤ contactCount X := by
       obtain ⟨k, hk⟩ := contactCount_even X
       omega
     -- a fully bonded particle
     have he : ∃ e ∈ X, (neighbors X e).card = 5 := by
       by_contra hno
-      push_neg at hno
+      push Not at hno
       have : contactCount X ≤ 24 := by
         rw [contactCount]
         calc ∑ z ∈ X, (neighbors X z).card ≤ ∑ _z ∈ X, 4 := by
@@ -785,7 +785,7 @@ theorem energy_ge_six_particles {X : Finset E3} (hX : HardCore X) (h6 : X.card =
     -- a second one
     have hf : ∃ g ∈ X.erase e, (neighbors X g).card = 5 := by
       by_contra hno
-      push_neg at hno
+      push Not at hno
       have hsum : ∑ z ∈ X.erase e, (neighbors X z).card ≤ 20 := by
         calc ∑ z ∈ X.erase e, (neighbors X z).card ≤ ∑ _z ∈ X.erase e, 4 := by
               refine Finset.sum_le_sum fun z hz => ?_
@@ -855,7 +855,7 @@ theorem energy_ge_six_particles {X : Finset E3} (hX : HardCore X) (h6 : X.card =
         omega
       have hv' : ∃ x ∈ Y.erase u, 4 ≤ (neighbors X x).card := by
         by_contra hno
-        push_neg at hno
+        push Not at hno
         have : ∑ x ∈ Y.erase u, (neighbors X x).card ≤ 9 := by
           calc ∑ x ∈ Y.erase u, (neighbors X x).card ≤ ∑ _x ∈ Y.erase u, 3 := by
                 refine Finset.sum_le_sum fun x hx => ?_
@@ -894,7 +894,7 @@ theorem energy_ge_six_particles {X : Finset E3} (hX : HardCore X) (h6 : X.card =
       have b3 : dist v' w = 1 := (Finset.mem_filter.mp (Finset.mem_sdiff.mp hw).1).2
       exact common_triangle_impossible hef (hYC u huY) (hYC v' hv'Y) (hYC w hwY) b1 b2 b3
     · -- all `Y`-degrees are four: the ring carries a perfect four-cycle
-      push_neg at hT
+      push Not at hT
       have hdeg4 : ∀ u ∈ Y, (neighbors X u).card = 4 := by
         intro u huY
         have h5 := hdeg u (hYX u huY)

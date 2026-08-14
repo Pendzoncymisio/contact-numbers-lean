@@ -400,7 +400,7 @@ complement of `K7` is killed by a verified certificate. -/
 theorem seven_particle_bound {X : Finset E3} (hX : HardCore X) (h7 : X.card = 7) :
     contactCount X ≤ 30 := by
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   obtain ⟨m, hm⟩ := contactCount_even X
   have h32 : 32 ≤ contactCount X := by omega
   -- enumerate the particles
@@ -467,7 +467,7 @@ theorem seven_particle_bound {X : Finset E3} (hX : HardCore X) (h7 : X.card = 7)
     apply Finset.filter_congr
     intro q hq
     have hne := hAne q hq
-    simp only [not_lt, eq_iff_iff]
+    simp only [not_lt]
     exact ⟨fun h => lt_of_le_of_ne h (fun hh => hne hh.symm), fun h => le_of_lt h⟩
   have hVU : V.card = U.card := by
     apply Finset.card_bij (fun q _ => Prod.swap q)

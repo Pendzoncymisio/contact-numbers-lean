@@ -69,7 +69,7 @@ at `1/2`; vanishing `4×4` Gram determinants force `⟨y₀,y₂⟩ = ⟨y₁,y�
 beyond the hard-core bound `1/2`. This kills survivor classes 0, 1, 2 of the 19-bond
 eight-particle enumeration. -/
 theorem pattern_p1_impossible {X : Finset E3} (hX : HardCore X)
-    {c : E3} {u : Fin 6 → E3} (hc : c ∈ X) (hu : ∀ i, u i ∈ X)
+    {c : E3} {u : Fin 6 → E3} (_hc : c ∈ X) (hu : ∀ i, u i ∈ X)
     (huinj : Function.Injective u)
     (hbond : ∀ i, dist c (u i) = 1)
     (h03 : dist (u 0) (u 3) = 1) (h04 : dist (u 0) (u 4) = 1)
@@ -129,8 +129,8 @@ theorem pattern_p1_impossible {X : Finset E3} (hX : HardCore X)
     have hsym := real_inner_comm (y 0) (y 2)
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself, hself, hself, hself, e03, e30, e04, e40, e23, e32, e24, e42, e34, e43,
       hsym] at hd
     have hfact : ((inner ℝ (y 0) (y 2) : ℝ) - 1) * (3 * inner ℝ (y 0) (y 2) + 1) = 0 := by
@@ -146,8 +146,8 @@ theorem pattern_p1_impossible {X : Finset E3} (hX : HardCore X)
     have hsym := real_inner_comm (y 1) (y 3)
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself, hself, hself, hself, e12, e21, e14, e41, e23, e32, e24, e42, e34, e43,
       hsym] at hd
     have hfact : ((inner ℝ (y 1) (y 3) : ℝ) - 1) * (3 * inner ℝ (y 1) (y 3) + 1) = 0 := by
@@ -168,8 +168,8 @@ theorem pattern_p1_impossible {X : Finset E3} (hX : HardCore X)
     have hsym := real_inner_comm (y 0) (y 1)
     rw [det_fin_four] at hd1 hd2
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd1 hd2
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd1 hd2
     rw [hself, hself, hself, hself, hα02, hβ02, e03, e30, e12, e21, e23, e32,
       hα13, hβ13, hsym] at hd1
     rw [hself, hself, hself, hself, hα02, hβ02, e04, e40, e12, e21, e14, e41,
@@ -194,8 +194,8 @@ theorem pattern_p1_impossible {X : Finset E3} (hX : HardCore X)
   have hsym := real_inner_comm (y 4) (y 5)
   rw [det_fin_four] at hd
   simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-    Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-    Matrix.head_fin_const] at hd
+    Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+    ] at hd
   rw [hself, hself, hself, hself, hα01, hβ01, e04, e40, e05, e50, e14, e41, e15, e51,
     hsym] at hd
   have hfact : ((inner ℝ (y 4) (y 5) : ℝ) - 1) * (11 * inner ℝ (y 4) (y 5) - 7) = 0 := by
@@ -257,7 +257,7 @@ private lemma Q_corner {a b : ℝ}
 others carrying the prism shell code `{01, 04, 05, 12, 13, 23, 25, 34, 45}`. Kills
 survivor class 3 of the 19-bond eight-particle enumeration. -/
 theorem pattern_p4_impossible {X : Finset E3} (hX : HardCore X)
-    {c : E3} {u : Fin 6 → E3} (hc : c ∈ X) (hu : ∀ i, u i ∈ X)
+    {c : E3} {u : Fin 6 → E3} (_hc : c ∈ X) (hu : ∀ i, u i ∈ X)
     (huinj : Function.Injective u)
     (hbond : ∀ i, dist c (u i) = 1)
     (h01 : dist (u 0) (u 1) = 1) (h04 : dist (u 0) (u 4) = 1)
@@ -330,8 +330,8 @@ theorem pattern_p4_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 0, y 1, y 2, y 5]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself, hself, hself, hself, e01, e10, e05, e50, e12, e21, e25, e52,
       s20, s51] at hd
     have hfact : ((inner ℝ (y 0) (y 2) : ℝ) - 1) * ((inner ℝ (y 1) (y 5) : ℝ) - 1)
@@ -349,8 +349,8 @@ theorem pattern_p4_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 0, y 1, y 3, y 4]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself, hself, hself, hself, e01, e10, e04, e40, e13, e31, e34, e43,
       s30, s41] at hd
     have hfact : ((inner ℝ (y 0) (y 3) : ℝ) - 1) * ((inner ℝ (y 1) (y 4) : ℝ) - 1)
@@ -368,8 +368,8 @@ theorem pattern_p4_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 2, y 3, y 4, y 5]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself, hself, hself, hself, e23, e32, e25, e52, e34, e43, e45, e54,
       s42, s53] at hd
     have hfact : ((inner ℝ (y 2) (y 4) : ℝ) - 1) * ((inner ℝ (y 3) (y 5) : ℝ) - 1)
@@ -399,8 +399,8 @@ theorem pattern_p4_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 0, y 1, y 2, y 3]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself, hself, hself, hself, e01, e10, e12, e21, e13, e31, e23, e32,
       s20, s30] at hd
     linear_combination (-16 : ℝ) * hd
@@ -410,8 +410,8 @@ theorem pattern_p4_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 0, y 3, y 4, y 5]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself, hself, hself, hself, e04, e40, e05, e50, e34, e43, e45, e54,
       s30, s53] at hd
     linear_combination (-16 : ℝ) * hd
@@ -430,8 +430,8 @@ theorem pattern_p4_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 0, y 1, y 2, y 4]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself, hself, hself, hself, e01, e10, e04, e40, e12, e21, s20, s41, s42,
       ha, he14, hf24] at hd
     norm_num at hd
@@ -445,8 +445,8 @@ theorem pattern_p4_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 0, y 1, y 3, y 5]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself, hself, hself, hself, e01, e10, e05, e50, e13, e31, s30, s51, s53,
       hb, hd15, hg] at hd
     norm_num at hd
@@ -562,7 +562,7 @@ private lemma p5_scalar {R p1 p2 a b c d : ℝ}
       have hg2 : (d+1)*R^2/2 - 2*R*d - R ≤ 0 := by linarith
       have hkey : (d+1)*R ≤ 4*d + 2 := by
         by_contra hcon
-        push_neg at hcon
+        push Not at hcon
         have hpos : (0:ℝ) < R * ((d+1)*R - (4*d + 2)) :=
           mul_pos (by linarith) (by linarith)
         have hring : R * ((d+1)*R - (4*d + 2)) = 2*((d+1)*R^2/2 - 2*R*d - R) := by
@@ -724,8 +724,8 @@ theorem pattern_p5_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 1, y 2, y 3, y 4]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself1, hself2, hself3, hself4, e12, e21, e14, e41, e23, e32, e34, e43,
       s31, s42] at hd
     have hfact : ((inner ℝ (y 1) (y 3) : ℝ) - 1) * ((inner ℝ (y 2) (y 4) : ℝ) - 1)
@@ -751,8 +751,8 @@ theorem pattern_p5_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 1, y 2, y 3, y 5]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself1, hself2, hself3, hself5, e12, e21, e15, e51, e23, e32, e25, e52,
       s31, s53] at hd
     linear_combination (-16 : ℝ) * hd
@@ -762,8 +762,8 @@ theorem pattern_p5_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 1, y 2, y 4, y 5]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself1, hself2, hself4, hself5, e12, e21, e14, e41, e15, e51, e25, e52,
       s42, s54] at hd
     linear_combination (-16 : ℝ) * hd
@@ -779,8 +779,8 @@ theorem pattern_p5_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 0, y 3, y 4, y 5]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself3, hself4, hself5, e03, e30, e04, e40, e05, e50, e34, e43,
       s53, s54] at hd
     have hfact : (inner ℝ (y 0) (y 0) : ℝ) *
@@ -803,8 +803,8 @@ theorem pattern_p5_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 0, y 1, y 4, y 5]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself1, hself4, hself5, e04, e40, e05, e50, e14, e41, e15, e51,
       s10, s54] at hd
     have hfact : ((inner ℝ (y 4) (y 5) : ℝ) - 1) *
@@ -825,8 +825,8 @@ theorem pattern_p5_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 0, y 2, y 3, y 5]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself2, hself3, hself5, e03, e30, e05, e50, e23, e32, e25, e52,
       s20, s53] at hd
     have hfact : ((inner ℝ (y 3) (y 5) : ℝ) - 1) *
@@ -856,8 +856,8 @@ theorem pattern_p5_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 0, y 1, y 2, y 3]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself1, hself2, hself3, e03, e30, e12, e21, e23, e32, s10, s20, s31] at hd
     linear_combination (16 : ℝ) * hd
   have hK2 : -3 * (inner ℝ (y 0) (y 0) : ℝ)^2
@@ -875,8 +875,8 @@ theorem pattern_p5_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 0, y 1, y 2, y 4]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hself1, hself2, hself4, e04, e40, e12, e21, e14, e41, s10, s20, s42] at hd
     linear_combination (16 : ℝ) * hd
   exact p5_scalar hR1 hp1 hp2

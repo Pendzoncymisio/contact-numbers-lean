@@ -65,7 +65,7 @@ theorem degree_ge_four {X : Finset E3} (hX : HardCore X) (h8 : X.card = 8)
     (hcc : 37 ≤ contactCount X) : ∀ v ∈ X, 4 ≤ (neighbors X v).card := by
   intro v hv
   by_contra hlt
-  push_neg at hlt
+  push Not at hlt
   have herase := contactCount_erase (X := X) (v := v) hv
   have hY : (X.erase v).card = 7 := by rw [Finset.card_erase_of_mem hv, h8]
   have hXY : HardCore (X.erase v) := fun a ha b hb hab =>
@@ -562,14 +562,14 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
   · -- kind 2: K5
     simp only [checkCert, hk] at hkill
     norm_num at hkill
-    simp only [Bool.and_eq_true, and_assoc] at hkill
+    simp only [and_assoc] at hkill
     obtain ⟨h1, h2, h3, h4, h5, h6, h7, h8', h9, h10⟩ := hkill
     exact Emin7.five_points_impossible (hqdist h1) (hqdist h2) (hqdist h3) (hqdist h4)
       (hqdist h5) (hqdist h6) (hqdist h7) (hqdist h8') (hqdist h9) (hqdist h10)
   · -- kind 3: ring degree three
     simp only [checkCert, hk] at hkill
     norm_num at hkill
-    simp only [Bool.and_eq_true, and_assoc] at hkill
+    simp only [and_assoc] at hkill
     obtain ⟨huv, huc, hvc, hux, hvx, huy, hvy, huz, hvz, hcx, hcy, hcz,
       hxy, hxz, hyz⟩ := hkill
     obtain ⟨_, hx8, _⟩ := hqlt hux
@@ -582,7 +582,7 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
   · -- kind 4: six common neighbours
     simp only [checkCert, hk] at hkill
     norm_num at hkill
-    simp only [Bool.and_eq_true, and_assoc] at hkill
+    simp only [and_assoc] at hkill
     obtain ⟨huv, hu1, hv1, hu2, hv2, hu3, hv3, hu4, hv4, hu5, hv5, hu6, hv6,
       h12', h13', h14', h15', h16', h23', h24', h25', h26', h34', h35', h36',
       h45', h46', h56'⟩ := hkill
@@ -632,7 +632,7 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
   · -- kind 5: three particles with three common neighbours
     simp only [checkCert, hk] at hkill
     norm_num at hkill
-    simp only [Bool.and_eq_true, and_assoc] at hkill
+    simp only [and_assoc] at hkill
     obtain ⟨hab, hac, hbc, h12', h13', h23', haw1, hbw1, hcw1, haw2, hbw2, hcw2,
       haw3, hbw3, hcw3⟩ := hkill
     obtain ⟨ha8, hw18, _⟩ := hqlt haw1
@@ -662,7 +662,7 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
   · -- kind 6: pattern_p1_impossible
     simp only [checkCert, hk] at hkill
     norm_num at hkill
-    simp only [Bool.and_eq_true, and_assoc] at hkill
+    simp only [and_assoc] at hkill
     obtain ⟨hall1, hall2, hs0, hs1, hs2, hs3, hs4, hs5, hs6, hs7, hs8, hb0, hb1, hb2, hb3, hb4, hb5⟩ := hkill
     have hm8 : ∀ t, t < 7 → fld cert t < 8 := fun t ht => hall1 t ht
     have hmne : ∀ t t', t < 7 → t' < t → fld cert t ≠ fld cert t' :=
@@ -692,7 +692,7 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
   · -- kind 7: pattern_p4_impossible
     simp only [checkCert, hk] at hkill
     norm_num at hkill
-    simp only [Bool.and_eq_true, and_assoc] at hkill
+    simp only [and_assoc] at hkill
     obtain ⟨hall1, hall2, hs0, hs1, hs2, hs3, hs4, hs5, hs6, hs7, hs8, hb0, hb1, hb2, hb3, hb4, hb5⟩ := hkill
     have hm8 : ∀ t, t < 7 → fld cert t < 8 := fun t ht => hall1 t ht
     have hmne : ∀ t t', t < 7 → t' < t → fld cert t ≠ fld cert t' :=
@@ -722,7 +722,7 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
   · -- kind 8: pattern_p5_impossible
     simp only [checkCert, hk] at hkill
     norm_num at hkill
-    simp only [Bool.and_eq_true, and_assoc] at hkill
+    simp only [and_assoc] at hkill
     obtain ⟨hall1, hall2, hs0, hs1, hs2, hs3, hs4, hs5, hs6, hs7, hs8, hb0, hb1, hb2, hb3, hb4⟩ := hkill
     have hm8 : ∀ t, t < 7 → fld cert t < 8 := fun t ht => hall1 t ht
     have hmne : ∀ t t', t < 7 → t' < t → fld cert t ≠ fld cert t' :=
@@ -1041,7 +1041,7 @@ lemma exists_sorted_enum {X : Finset E3} (h8 : X.card = 8) :
     intro i j hij
     have h := List.nodup_iff_injective_get.mp hnd hij
     have := congrArg Fin.val h
-    simp only [Fin.coe_cast] at this
+    simp only [Fin.val_cast] at this
     exact Fin.ext this
   refine ⟨fun i => l.get (i.cast hlen.symm), hinj, ?_, ?_⟩
   · apply Finset.eq_of_subset_of_card_le
@@ -1066,7 +1066,7 @@ theorem eight_particle_bound_of_tree {fuel : ℕ} {data : List ℕ}
     (htree : walk fuel data 0 [] [] = some [])
     {X : Finset E3} (hX : HardCore X) (h8 : X.card = 8) : contactCount X ≤ 36 := by
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   obtain ⟨m, hm⟩ := contactCount_even X
   have hcc : 38 ≤ contactCount X := by omega
   obtain ⟨p, hpinj, hXim, hsort⟩ := exists_sorted_enum h8

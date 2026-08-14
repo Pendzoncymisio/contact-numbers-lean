@@ -43,12 +43,12 @@ theorem gap_bounds_six {d : ℝ} (h0 : 0 < d) (h2 : d < 2*π) (hc : Real.cos d �
     rw [Real.cos_pi_div_three]; norm_num
   refine ⟨?_, ?_⟩
   · by_contra h
-    push_neg at h
+    push Not at h
     have : Real.cos (π/3) ≤ Real.cos d :=
       Real.cos_le_cos_of_nonneg_of_le_pi h0.le (by linarith) h
     linarith
   · by_contra h
-    push_neg at h
+    push Not at h
     have hle : Real.cos (π/3) ≤ Real.cos (2*π - d) :=
       Real.cos_le_cos_of_nonneg_of_le_pi (by linarith) (by linarith) (by linarith)
     rw [show (2*π - d) = -(d - 2*π) by ring, Real.cos_neg,
@@ -92,7 +92,7 @@ theorem ring_card_le_five {S : Finset (Fin 3 → ℝ)} {p : Fin 3 → ℝ} (hp :
     (hnorm : ∀ z ∈ S, dot3 z z = 3/4)
     (hsep : ∀ z ∈ S, ∀ z' ∈ S, z ≠ z' → dot3 z z' ≤ 1/4) : S.card ≤ 5 := by
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   have hcard : 6 ≤ S.card := hcon
   obtain ⟨z₀, hz₀⟩ : S.Nonempty := Finset.card_pos.mp (by omega)
   set R : ℝ := Real.sqrt (3/4) with hRdef
@@ -516,7 +516,7 @@ theorem common_neighbors_triple_le_two (X : Finset E3) {a b c : E3}
     (hab : a ≠ b) (hac : a ≠ c) (hbc : b ≠ c) :
     (neighbors X a ∩ (neighbors X b ∩ neighbors X c)).card ≤ 2 := by
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   obtain ⟨T, hTsub, hT3⟩ := Finset.exists_subset_card_eq
     (show 3 ≤ (neighbors X a ∩ (neighbors X b ∩ neighbors X c)).card by omega)
   obtain ⟨w1, w2, w3, h12, h13, h23, rfl⟩ := Finset.card_eq_three.mp hT3
@@ -584,8 +584,8 @@ theorem common_neighbors_triple_le_two (X : Finset E3) {a b c : E3}
   have hg0' : g 0 • (b - a) + g 1 • (c - a) + g 2 • (w2 - w1) + g 3 • (w3 - w1) = 0 := by
     have h := hg0
     simp only [Fin.sum_univ_four, hqdef, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at h
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at h
     convert h using 2
   -- the relation splits: the two halves are orthogonal, so each vanishes
   have hgrp : (g 0 • (b - a) + g 1 • (c - a)) + (g 2 • (w2 - w1) + g 3 • (w3 - w1)) = 0 := by

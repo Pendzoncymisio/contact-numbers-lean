@@ -89,7 +89,7 @@ lemma bondCode_lt {p q : Fin 9 → E3} {i : ℕ} (hi : i < 36)
       < 2 ^ (35 - i) := by
     have hb : ∀ k ∈ Finset.Ico (i + 1) 36, bbit p k * 2 ^ (35 - k) ≤ 2 ^ (35 - k) := by
       intro k _
-      simpa using mul_le_mul_right' (bbit_le_one p k) (2 ^ (35 - k))
+      simpa using mul_le_mul_left (bbit_le_one p k) (2 ^ (35 - k))
     have h1 : ∑ k ∈ Finset.Ico (i + 1) 36, bbit p k * 2 ^ (35 - k)
         ≤ ∑ k ∈ Finset.Ico (i + 1) 36, 2 ^ (35 - k) := Finset.sum_le_sum hb
     have h2 : ∑ k ∈ Finset.Ico (i + 1) 36, 2 ^ (35 - k)
@@ -117,7 +117,7 @@ lemma bondCode_lt {p q : Fin 9 → E3} {i : ℕ} (hi : i < 36)
     have h5 : bbit p i + 1 ≤ bbit q i := hlt
     calc bbit p i * 2 ^ (35 - i) + 2 ^ (35 - i)
         = (bbit p i + 1) * 2 ^ (35 - i) := by ring
-      _ ≤ bbit q i * 2 ^ (35 - i) := mul_le_mul_right' h5 _
+      _ ≤ bbit q i * 2 ^ (35 - i) := mul_le_mul_left h5 _
   omega
 
 open scoped Classical in

@@ -471,54 +471,54 @@ collapses two of the five points, contradicting distinctness.
 \subsection{Shell obstructions}
 
 For $n = 8$ three further patterns are needed, each ruling out a specific contact
-pattern in the \emph{shell} of a particle of degree six. Write $c$ for the central
-particle and $u_0,\dots,u_5$ for its neighbours; recentring at $c$ and rescaling,
-the $u_i - c$ are unit vectors, and the contacts among them are the pairs at inner
-product $1/2$.
+pattern around a particle of high degree. Throughout, $ij$ abbreviates the pair
+$\{u_i, u_j\}$.
+
+If a particle $c$ is in contact with $u_0,\dots,u_5$, then recentring at $c$ makes the
+six differences $u_i - c$ unit vectors, and two of them are in contact exactly when
+their inner product is $1/2$. Six unit vectors span at most three dimensions, so their
+Gram matrix is singular in a strong sense:
 
 \begin{lemma}[\texttt{gram\_det\_zero}]
 \label{lem:gram}
 Any four vectors of $\R^3$ have singular $4 \times 4$ Gram matrix.
 \end{lemma}
 
-\begin{lemma}[the shell patterns \texttt{P1}, \texttt{P4}, \texttt{P5}]
+\begin{lemma}[shell obstructions]
 \label{lem:patterns}
-Let $c, u_0, \dots, u_5$ be distinct particles of a hard-core configuration. None of
-the following three contact patterns occurs.
-\begin{center}
-\begin{tabular}{llll}
-\toprule
- & contacts among the $u_i$ & $c$ in contact with \\
-\midrule
-$P_1$ & $03,04,05,12,14,15,23,24,34$ & $u_0,\dots,u_5$ \\
-$P_4$ & $01,04,05,12,13,23,25,34,45$ & $u_0,\dots,u_5$ \\
-$P_5$ & $03,04,05,12,14,15,23,25,34$ & $u_1,\dots,u_5$ \\
-\bottomrule
-\end{tabular}
-\end{center}
+Let $X$ be hard-core and let $c, u_0, \dots, u_5 \in X$ be distinct. None of the
+following configurations occurs.
+\begin{description}[leftmargin=0pt, itemsep=3pt, font=\normalfont\itshape]
+\item[$P_1$.] $c$ is in contact with every $u_i$, and the contacts among the $u_i$
+  include $03$, $04$, $05$, $12$, $14$, $15$, $23$, $24$, $34$.
+\item[$P_4$.] $c$ is in contact with every $u_i$, and the contacts among the $u_i$
+  include $01$, $04$, $05$, $12$, $13$, $23$, $25$, $34$, $45$.
+\item[$P_5$.] $c$ is in contact with $u_1, \dots, u_5$, not necessarily with $u_0$, and
+  the contacts among the $u_i$ include $03$, $04$, $05$, $12$, $14$, $15$, $23$, $25$, $34$.
+\end{description}
 \end{lemma}
 
 \begin{proof}[Proof sketch]
-In each case the recentred shell has rank at most three, so by Lemma~\ref{lem:gram}
-every $4\times4$ Gram determinant among the shell vectors vanishes. The prescribed
-contacts fix most entries of the Gram matrix; the vanishing determinants then become
-polynomial equations in the few free entries. For $P_1$ these force
-$x_{02} = x_{13} = -1/3$ and $x_{01} = -7/18$, after which
-$\det G[0,1,4,5]$ has roots $1$ and $7/11$, both exceeding the hard-core ceiling
-$1/2$. For $P_4$ the six free entries lie on a $6$-cycle; opposite-pair determinants
-factor as $(a-1)(b-1)(ab+a+b)$, so hard-core forces $ab+a+b = 0$ exactly, and the
-adjacent-pair determinants $12a^2 - 8ab - 4a + 12b^2 - 4b - 5 = 0$ then leave only
-inadmissible solutions. $P_5$ is a difference-vector variant with no cone vertex.
-Full details are in the formalization, where these three lemmas are
-\texttt{pattern\_p1\_impossible},
-\texttt{pattern\_p4\_impossible} and
-\texttt{pattern\_p5\_impossible}.
-\end{proof}
+For $P_1$ and $P_4$ the recentred shell spans at most three dimensions, so by
+Lemma~\ref{lem:gram} every $4 \times 4$ Gram determinant among the six shell vectors
+vanishes. The prescribed contacts fix most entries of the Gram matrix, and the
+vanishing determinants become polynomial equations in the few remaining ones. For
+$P_1$ they force $x_{02} = x_{13} = -1/3$ and $x_{01} = -7/18$, after which
+$\det G[0,1,4,5]$ has roots $1$ and $7/11$, both above the hard-core ceiling $1/2$.
+For $P_4$ the free entries lie on a $6$-cycle; the determinants of opposite pairs
+factor as $(a-1)(b-1)(ab+a+b)$, so hard-core forces $ab + a + b = 0$ exactly, and the
+adjacent-pair determinants $12a^2 - 8ab - 4a + 12b^2 - 4b - 5 = 0$ then admit no
+admissible solution.
 
-\begin{remark}
-Lemmas~\ref{lem:notri}--\ref{lem:patterns} do not appear in the literature in this
-form.
-\end{remark}
+$P_5$ has no vertex adjacent to all six, so there is no common centre to recentre at
+and the argument above does not apply directly. It is run instead on the differences
+$u_i - u_j$, whose Gram matrix is again singular by Lemma~\ref{lem:gram}, with the
+contact conditions expressed in those coordinates.
+
+The three arguments are \texttt{pattern\_p1\_impossible},
+\texttt{pattern\_p4\_impossible} and \texttt{pattern\_p5\_impossible} in the
+formalization, which carries them out in full.
+\end{proof}
 
 \section{Six particles}
 \label{sec:six}

@@ -180,8 +180,8 @@ theorem pattern_p6_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 0, y 2, y 3, y 5]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hs0, hs2, hs3, hs5, e02, e20, e03, e30, e23, e32, e25, e52, e35, e53,
       ← hpdef, e50] at hd
     have hfact : (p - 1) * (3 * p + 1) = 0 := by linear_combination (-4 : ℝ) * hd
@@ -193,8 +193,8 @@ theorem pattern_p6_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 0, y 2, y 4, y 5]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hs0, hs2, hs4, hs5, e02, e20, e04, e40, e24, e42, e45, e54, e25, e52,
       ← hpdef, e50, hp] at hd
     linear_combination (-9 / 2 : ℝ) * hd
@@ -213,8 +213,8 @@ theorem pattern_p6_impossible {X : Finset E3} (hX : HardCore X)
     have hd := gram_det_zero ![y 0, y 3, y 4, y 5]
     rw [det_fin_four] at hd
     simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-      Matrix.head_fin_const] at hd
+      Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+      ] at hd
     rw [hs0, hs3, hs4, hs5, e03, e30, e04, e40, e34, e43, e45, e54, e35, e53,
       ← hpdef, e50, hp] at hd
     linear_combination (-9 / 2 : ℝ) * hd
@@ -228,8 +228,8 @@ theorem pattern_p6_impossible {X : Finset E3} (hX : HardCore X)
   have hd := gram_det_zero ![y 0, y 2, y 3, y 4]
   rw [det_fin_four] at hd
   simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-    Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three,
-    Matrix.head_fin_const] at hd
+    Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three
+    ] at hd
   rw [hs0, hs2, hs3, hs4, e02, e20, e03, e30, e04, e40, e23, e32, e24, e42,
     e34, e43, hm, hc2, hc3] at hd
   norm_num at hd
