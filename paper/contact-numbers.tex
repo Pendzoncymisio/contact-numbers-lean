@@ -1,0 +1,887 @@
+% !TeX program = pdflatex
+% !TeX TS-program = pdflatex
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage[margin=3.2cm]{geometry}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{fancyvrb}
+% Lean sources are shown through fancyvrb, not listings: listings mis-orders
+% multi-byte characters adjacent to ASCII punctuation, emitting "∀(" for the
+% input "(∀". Verbatim fidelity matters more here than keyword colouring.
+\fvset{fontsize=\small, xleftmargin=1.2em}
+
+% The Lean notation, for pdflatex. Declared after inputenc so the mappings also
+% fire inside fancyvrb, which is where the Lean sources are set.
+\DeclareUnicodeCharacter{2200}{\ensuremath{\forall}}
+\DeclareUnicodeCharacter{2208}{\ensuremath{\in}}
+\DeclareUnicodeCharacter{2192}{\ensuremath{\rightarrow}}
+\DeclareUnicodeCharacter{2264}{\ensuremath{\leq}}
+\DeclareUnicodeCharacter{2260}{\ensuremath{\neq}}
+\DeclareUnicodeCharacter{2227}{\ensuremath{\wedge}}
+\DeclareUnicodeCharacter{2211}{\ensuremath{\textstyle\sum}}
+\DeclareUnicodeCharacter{2115}{\ensuremath{\mathbb{N}}}
+\DeclareUnicodeCharacter{211D}{\ensuremath{\mathbb{R}}}
+\usepackage{xcolor}
+
+\hypersetup{colorlinks=true, linkcolor=blue!50!black, citecolor=blue!50!black,
+            urlcolor=blue!50!black}
+
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\card}[1]{\lvert #1 \rvert}
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+\newcommand{\inner}[2]{\langle #1, #2 \rangle}
+\newcommand{\TODO}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+
+\title{Exact contact numbers for packings of six to nine\\
+       congruent balls, formally verified}
+
+\author{Marek Wrzos\\[2pt]
+  \normalsize\texttt{marek.wrzos.sgh@gmail.com}\\[1pt]
+  \normalsize Independent researcher\\[1pt]
+  \normalsize ORCID \href{https://orcid.org/0009-0005-1521-2633}{0009-0005-1521-2633}}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The \emph{contact number} $c(n,3)$ of a packing of $n$ congruent balls in Euclidean
+$3$-space is the maximum number of touching pairs the packing can have. Exact values
+have been known only for $n \le 5$. Bezdek and Khan~\cite{BezdekKhan2018} record
+$c(n,3) = 3n-6$ for $6 \le n \le 9$ as a conjecture, and derive it as a proposition
+\emph{conditional} on the completeness of the numerical enumeration of
+Arkus, Manoharan and Brenner~\cite{ArkusSIAM2011}; they state explicitly that
+``the contact number $c(n,3)$ is still unknown for $n \ge 6$''.
+
+We prove $c(6,3) = 12$, $c(7,3) = 15$, $c(8,3) = 18$ and $c(9,3) = 21$
+unconditionally, and we prove in addition that every packing attaining these maxima is
+minimally rigid. Since Conjecture 5.2 asserts a numerical value only for
+$n = 6,\dots,9$, its numerical half is thereby settled completely, and its structural
+half is settled at every $n$ for which it makes a numerical claim.
+The proofs are formalized in the Lean~4 proof assistant~\cite{Lean4} on top of
+\texttt{mathlib}~\cite{Mathlib2020} and are checked by Lean's kernel; they depend on
+no axioms beyond Lean's three standard ones, and in particular use no compiled-code
+evaluation. The geometric content is a short list of explicit lemmas about the
+configuration of common neighbours of a bonded pair; the combinatorial case analysis
+is delegated to kernel-verified certificates.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+Let $\mathcal{P}$ be a packing of $n$ congruent balls in $\E^3$: finitely many balls of
+equal radius with pairwise disjoint interiors. Its \emph{contact graph} has one vertex
+per ball and one edge per touching pair. The \emph{contact number} $c(n,3)$ is the
+largest number of edges such a graph can have. The problem is a finite,
+$3$-dimensional relative of Newton's kissing-number problem and, in the language of
+distance geometry, asks for the maximum number of times the minimum distance can occur
+among $n$ points of $\R^3$.
+
+The two-dimensional analogue was settled by Harborth~\cite{Harborth1974}, who proved
+that $n$ unit circles realise at most $\lfloor 3n - \sqrt{12n-3}\,\rfloor$ touching
+pairs. In three dimensions no exact formula is expected. Bezdek~\cite{Bezdek2012}
+proved
+\[
+  c(n,3) < 6n - 0.926\, n^{2/3} \qquad (n \ge 2),
+\]
+later improved in~\cite{BezdekReid2013}; the leading constant $6$ reflects the kissing
+number of $\R^3$ and the $n^{2/3}$ correction the surface of the cluster. For small
+$n$, however, the truth is much smaller than $6n$: a contact graph that is planar has
+at most $3n-6$ edges, and $3n-6$ is also the count in Maxwell's
+criterion~\cite{Maxwell1864} for a minimally rigid bar-and-joint framework in space,
+which is why the value $3n-6$ recurs throughout the physics literature on colloidal
+clusters.
+
+\subsection*{What was known}
+
+Exact values of $c(n,3)$ are classical only for $n \le 5$, where they are $0,1,3,6,9$
+and the arguments are elementary (for $n=5$ one needs that five points of $\R^3$ cannot
+be pairwise at distance one; see Lemma~\ref{lem:k5}).
+
+For $n \ge 6$ the literature is computational. Arkus, Manoharan and
+Brenner~\cite{ArkusPRL2009,ArkusSIAM2011} enumerated packings satisfying minimal
+rigidity constraints for $n \le 10$, solving the resulting distance-geometry systems
+analytically for $n \le 9$ and numerically for $n = 10$. Hoy, Harwayne-Gidansky and
+O'Hern~\cite{Hoy2012} extended the enumeration to $n = 11$, and
+Holmes-Cerfon~\cite{HolmesCerfon2016} enumerated rigid clusters for $n \le 14$ and
+maximal-contact clusters for $n \le 19$. These enumerations agree that the maximum is
+$3n-6$ for $n \le 9$ and that it first exceeds $3n-6$ at $n = 10$, where the maximum is
+$25 > 24$.
+
+None of these is a proof. The authors of each are explicit about this, and the survey
+of Bezdek and Khan~\cite{BezdekKhan2018} is explicit about it too: the elimination
+rules of~\cite{ArkusSIAM2011} ``are susceptible to round off errors, [so] there is a
+possibility that some adjacency matrices are incorrectly eliminated''; the method
+of~\cite{Hoy2012} ``employ[s] Newton's method, which cannot guarantee to obtain a
+solution, whenever one exists'' and rests on a Hamiltonian-path assumption shown false
+by Connelly and the Demaines. The survey draws the conclusion in one sentence:
+
+\begin{quote}
+``As a result, the contact number $c(n,3)$ is still unknown for $n \ge
+6$.''~\cite[\S5.1]{BezdekKhan2018}
+\end{quote}
+
+What the survey \emph{does} prove is a conditional statement, which is the correct
+point of comparison for the present paper:
+
+\begin{proposition}[{\cite[Prop.~5.1]{BezdekKhan2018}}]
+\label{prop:bk}
+Assume that all maximal-contact minimally rigid packings of $n \le 9$ spheres are
+listed in~\cite{ArkusPRL2009,ArkusSIAM2011}. Then $c(n,3) = 3n-6$ for
+$n = 4,\dots,9$, and there is a minimally rigid cluster attaining it.
+\end{proposition}
+
+\begin{conjecture}[{\cite[Conj.~5.2]{BezdekKhan2018}}]
+\label{conj:bk}
+For $n \ge 6$, every contact graph of a packing of $n$ spheres with $c(n,3)$ contacts
+is minimally rigid. Moreover $c(n,3) = 3n-6$ for $n = 6,\dots,9$.
+\end{conjecture}
+
+\subsection*{Results}
+
+\begin{theorem}
+\label{thm:main}
+$c(6,3) = 12$, \quad $c(7,3) = 15$, \quad $c(8,3) = 18$, \quad $c(9,3) = 21$.
+\end{theorem}
+
+The hypothesis of Proposition~\ref{prop:bk} is removed for these $n$: nothing here
+depends on any enumeration being complete, on floating-point arithmetic, or on any
+rigidity assumption. The statements quantify over \emph{all} finite subsets of $\R^3$
+with pairwise distances at least one --- no genericity, no boundedness, no
+nondegeneracy.
+
+Conjecture~\ref{conj:bk} has two halves with different quantifier ranges: a
+\emph{structural} claim for all $n \ge 6$, and a \emph{numerical} claim for
+$n = 6,\dots,9$. Theorem~\ref{thm:main} settles the numerical half for every $n$ it
+concerns, and the structural half follows at those $n$ as well.
+
+Recall the notion, which is combinatorial rather than kinematic
+(\cite[Def.~1]{BezdekKhan2018}, after~\cite{ArkusSIAM2011}): a cluster of $n \ge 4$
+spheres is \emph{minimally rigid} if every sphere touches at least three others and the
+cluster has at least $3n-6$ contacts. The survey stresses that this is ``neither
+sufficient nor necessary for rigidity'' in the sense of continuous deformability.
+
+\begin{theorem}
+\label{thm:conj52}
+Conjecture~\ref{conj:bk} holds for $n = 6, 7, 8, 9$: for these $n$, $c(n,3) = 3n-6$,
+the value is attained, and \emph{every} packing of $n$ congruent balls with $3n-6$
+contacts is minimally rigid.
+\end{theorem}
+
+What remains of Conjecture~\ref{conj:bk} is exactly its structural clause for
+$n \ge 10$, where no value $c(n,3)$ is known or conjectured by it. Theorem~\ref{thm:conj52}
+still says nothing about uniqueness of the maximisers; see \S\ref{sec:notproved}.
+
+\subsection*{Method, and what ``formally verified'' means here}
+
+The proofs are formalized in Lean~4 and machine-checked. The argument for $n=8$
+ranges over a search tree with $1\,267\,025$ nodes, each closed by one of ten geometric
+obstructions; the tree is a term in the ambient logic and its verification is a kernel
+reduction.
+
+Every theorem below reports exactly \texttt{[propext, Classical.choice, Quot.sound]}.
+There are no \texttt{sorry}s and no user-declared axioms. There is no use of
+\texttt{native\_decide}, which would delegate evaluation to compiled code and appear as
+the extra axiom \texttt{Lean.ofReduceBool}; all finite checks are performed by the Lean
+kernel itself (\texttt{decide +kernel}). The geometry is the twelve lemmas of
+\S\ref{sec:arsenal}, each with a short conventional proof; only the case coverage is
+mechanical. Reproduction is described in \S\ref{sec:repro}.
+
+\subsection*{A previous claim}
+
+A preprint of Reid~\cite{Reid2016} claims $C(6)=12$, $C(7)=15$, $C(8)=18$ and announces
+values up to $C(13)=36$. It is unpublished, has one version, and is not a proof; the
+argument for $n=6$ has a demonstrable gap and, more decisively, uses no geometric input
+at all, which no correct argument can do. Details are in
+Appendix~\ref{app:reid}.
+
+\section{Setting}
+\label{sec:setting}
+
+We work with balls of radius $\tfrac12$, so that touching means centres at distance
+exactly $1$; this differs from the normalisation of~\cite{BezdekKhan2018} (unit balls,
+centres at distance $2$) by a scaling.
+
+\begin{definition}
+A finite set $X \subseteq \R^3$ is \emph{hard-core} if $\operatorname{dist}(z,w) \ge 1$
+for all distinct $z,w \in X$. For $z \in X$ put
+$N_X(z) = \{ w \in X : \operatorname{dist}(z,w) = 1 \}$, and
+\[
+  \operatorname{cc}(X) \;=\; \sum_{z \in X} \card{N_X(z)},
+  \qquad
+  \operatorname{E}(X) \;=\; -\tfrac12 \operatorname{cc}(X).
+\]
+\end{definition}
+
+Thus $\operatorname{cc}(X)$ counts ordered touching pairs and is twice the number of
+contacts, and $-\operatorname{E}(X)$ is the contact number of the packing with centre
+set $X$. In this notation
+\[
+  c(n,3) \;=\; \max\{\, -\operatorname{E}(X) \;:\; X \text{ hard-core},\ \card X = n \,\}.
+\]
+The maximum is attained: the constructions of \S\ref{sec:constructions} realise it, so
+no compactness argument is needed.
+
+In Lean these are, verbatim:
+
+\begin{Verbatim}
+abbrev E3 := EuclideanSpace ℝ (Fin 3)
+
+def HardCore (X : Finset E3) : Prop :=
+  ∀ z ∈ X, ∀ w ∈ X, z ≠ w → 1 ≤ dist z w
+
+noncomputable def neighbors (X : Finset E3) (z : E3) : Finset E3 :=
+  X.filter (fun w => dist z w = 1)
+
+noncomputable def contactCount (X : Finset E3) : ℕ :=
+  ∑ z ∈ X, (neighbors X z).card
+
+noncomputable def energy (X : Finset E3) : ℝ := -(contactCount X : ℝ) / 2
+\end{Verbatim}
+
+\noindent and Theorem~\ref{thm:main} is the conjunction of the four statements
+
+\begin{Verbatim}
+theorem groundState_six :
+    (∀ X : Finset E3, HardCore X → X.card = 6 → -12 ≤ energy X)
+  ∧ HardCore octa ∧ octa.card = 6 ∧ energy octa = -12
+
+theorem groundState_seven : ... -15 ... bipyr7    ...
+theorem groundState_eight : ... -18 ... capBipyr8 ...
+theorem groundState_nine  : ... -21 ... capBipyr9 ...
+\end{Verbatim}
+
+\noindent while Theorem~\ref{thm:conj52} is \texttt{conj52\_six} through
+\texttt{conj52\_nine}, of which the last reads
+
+\begin{Verbatim}
+theorem conj52_nine :
+    (∀ X : Finset E3, HardCore X → X.card = 9 → contactCount X ≤ 42)
+  ∧ (HardCore capBipyr9 ∧ capBipyr9.card = 9 ∧ contactCount capBipyr9 = 42)
+  ∧ (∀ X : Finset E3, HardCore X → X.card = 9 → contactCount X = 42 →
+      (∀ v ∈ X, 3 ≤ (neighbors X v).card) ∧ 42 ≤ contactCount X)
+\end{Verbatim}
+
+\noindent each of which reports the three standard axioms and nothing more. The third
+conjunct is Definition~1 of~\cite{BezdekKhan2018} spelled out.
+
+\begin{remark}
+Two small facts are used silently throughout. First, $\operatorname{cc}(X)$ is even
+(the handshake lemma: bonds come in ordered pairs), which lets us step from an odd
+lower bound to the next even one. Second, deleting a vertex $v$ removes exactly
+$2\card{N_X(v)}$ from $\operatorname{cc}$, which is what makes the recursion of
+\S\ref{sec:eight} work.
+\end{remark}
+
+\section{The local arsenal}
+\label{sec:arsenal}
+
+All geometry used in this paper is in the following twelve statements. Every one is
+a statement about a bounded number of points of $\R^3$, and every one is proved in the
+formalization by an explicit algebraic identity --- there is no appeal to spherical
+geometry, convexity, or topology anywhere in the development.
+
+\subsection{Five points}
+
+\begin{lemma}[\texttt{pairwise\_unit\_card\_le\_four}]
+\label{lem:k5}
+If $S \subseteq \R^3$ is finite and $\operatorname{dist}(u,v) = 1$ for all distinct
+$u,v \in S$, then $\card S \le 4$.
+\end{lemma}
+
+\begin{proof}
+Suppose $p_0,\dots,p_4$ are pairwise at distance $1$ and set $q_i = p_i - p_0$ for
+$i = 1,\dots,4$. Then $\norm{q_i} = 1$ and, expanding
+$\norm{q_i - q_j}^2 = 1$, $\inner{q_i}{q_j} = \tfrac12$ for $i \ne j$. Four vectors in
+$\R^3$ are linearly dependent, so $\sum_i g_i q_i = 0$ for some $g \ne 0$, whence
+\[
+  0 \;=\; \Bigl\lVert \sum_i g_i q_i \Bigr\rVert^2
+    \;=\; \sum_i g_i^2 + \tfrac12\sum_{i \ne j} g_i g_j
+    \;=\; \tfrac12 \sum_i g_i^2 + \tfrac12 \Bigl(\sum_i g_i\Bigr)^2 \;>\; 0,
+\]
+a contradiction.
+\end{proof}
+
+This alone gives $c(4,3)=6$ and $c(5,3)=9$.
+
+\subsection{The ring of a bonded pair}
+
+The single geometric idea behind $n = 6,7,8$ is that the common neighbours of a bonded
+pair are severely constrained. Let $v,w$ be at distance $1$ and let $m = \tfrac12(v+w)$
+be the midpoint. If $u$ is at distance $1$ from both, then $z = u - m$ satisfies
+\[
+  \inner{z}{w-v} = 0,
+  \qquad
+  \norm{z}^2 = \tfrac34 .
+\]
+So all common neighbours, recentred at $m$, lie on a circle of radius $\sqrt3/2$ in the
+plane $(w-v)^\perp$. We call this the \emph{ring} of the bond $vw$. For two ring
+vectors $z,z'$,
+\[
+  \norm{z - z'}^2 = \tfrac32 - 2\inner{z}{z'},
+\]
+so the hard-core condition $\norm{z-z'} \ge 1$ is exactly $\inner{z}{z'} \le \tfrac14$,
+and $z,z'$ are themselves in contact exactly when $\inner{z}{z'} = \tfrac14$. The ring
+is therefore a set of vectors of squared norm $3/4$ in a $2$-plane, pairwise at inner
+product at most $1/4$, and its contact graph is the graph of \emph{equality}.
+
+\begin{lemma}[\texttt{ring\_card\_le\_five}, \texttt{common\_neighbors\_le\_five}]
+\label{lem:ringfive}
+A ring has at most five elements. Consequently, two bonded particles of a hard-core
+configuration have at most five common neighbours.
+\end{lemma}
+
+\begin{proof}
+Writing ring vectors in polar form, the cosine of the angle between two of them is
+$\inner{z}{z'} / (3/4) \le 1/3$, so consecutive azimuths differ by more than
+$\arccos(1/3) > 70^\circ$. Six such directions would need more than $423^\circ$.
+\end{proof}
+
+Both bounds are sharp: face-centred and hexagonal close packings realise four common
+neighbours, the pentagonal bipyramid five.
+
+\begin{lemma}[\texttt{ring\_no\_triangle}]
+\label{lem:notri}
+Three ring vectors pairwise at inner product exactly $1/4$ do not exist.
+\end{lemma}
+
+\begin{proof}
+Their Gram matrix has all diagonal entries $3/4$ and all off-diagonal entries $1/4$,
+hence determinant $5/16 \ne 0$; but they lie in a $2$-plane, so the Gram matrix has
+rank at most two.
+\end{proof}
+
+\begin{lemma}[\texttt{ring\_no\_square}]
+\label{lem:nosq}
+Four ring vectors $a,b,c,d$ with
+$\inner{a}{c} = \inner{a}{d} = \inner{b}{c} = \inner{b}{d} = 1/4$
+and $\inner{a}{b} \le 1/4$, $\inner{c}{d} \le 1/4$ do not exist.
+\end{lemma}
+
+\begin{proof}
+Both $c$ and $d$ are orthogonal to $a - b$, which is a nonzero vector of the $2$-plane,
+so $c$ and $d$ are parallel; as both have squared norm $3/4$,
+$\inner{c}{d} = \pm 3/4$. The value $+3/4$ forces $c = d$, and $-3/4$ violates
+$\inner{c}{d} \le 1/4$.
+\end{proof}
+
+\begin{lemma}[\texttt{ring\_two\_positions}]
+\label{lem:twopos}
+Let $c,x,y$ be ring vectors with $\inner{c}{x} = \inner{c}{y} = \alpha$. Then
+\[
+  \inner{x}{y} = \tfrac34
+  \qquad\text{or}\qquad
+  \inner{x}{y} = \tfrac{8}{3}\alpha^2 - \tfrac34 .
+\]
+In particular $\alpha = \tfrac14$ gives $\inner{x}{y} \in \{\tfrac34, -\tfrac{7}{12}\}$,
+and $\alpha = -\tfrac{7}{12}$ gives $\inner{x}{y} \in \{\tfrac34, \tfrac{17}{108}\}$.
+\end{lemma}
+
+\begin{proof}
+Choose coordinates in the $2$-plane with $c = (\tfrac{\sqrt3}{2},0)$ and write
+$x = \tfrac{\sqrt3}{2}(\cos\theta,\sin\theta)$. Then $\inner{c}{x} = \tfrac34\cos\theta$,
+so $\cos\theta = \tfrac{4\alpha}{3}$ determines $\theta$ up to sign: $x$ and $y$ are
+either equal (giving $\inner{x}{y} = \norm{x}^2 = \tfrac34$) or reflections of each
+other in the line $\R c$, in which case
+$\inner{x}{y} = \tfrac34\cos 2\theta = \tfrac34(2\cos^2\theta - 1)
+= \tfrac{8}{3}\alpha^2 - \tfrac34$.
+\end{proof}
+
+\begin{lemma}[\texttt{ring\_degree\_le\_two}]
+\label{lem:ringdeg}
+A ring vector is in contact with at most two other ring vectors. Hence the contact
+graph of a ring is a disjoint union of paths.
+\end{lemma}
+
+\begin{proof}
+Suppose $x,y,z$ are ring vectors with $\inner{c}{x} = \inner{c}{y} = \inner{c}{z} =
+1/4$. By Lemma~\ref{lem:twopos} each pair among $x,y,z$ has inner product $3/4$ or
+$-7/12$; the value $3/4$ means coincidence, so all three pairs are at $-7/12$. Applying
+Lemma~\ref{lem:twopos} again at $\alpha = -7/12$ puts any two of them at $3/4$ or
+$17/108$, and neither is $-7/12$.
+\end{proof}
+
+\begin{lemma}[\texttt{ring\_no\_pentagon}]
+\label{lem:nopent}
+A five-cycle of contacts among ring vectors, with the two pairs skew at $z_1$
+hard-core, does not exist.
+\end{lemma}
+
+\begin{proof}
+Chaining Lemma~\ref{lem:twopos} around the cycle forces
+$\inner{z_1}{z_3} = \inner{z_1}{z_4} = -7/12$, and then $z_3, z_4$ must sit at inner
+product $3/4$ or $17/108$; but they are adjacent in the cycle, so at $1/4$.
+\end{proof}
+
+\subsection{Common neighbours of a triple}
+
+\begin{lemma}[\texttt{common\_neighbors\_triple\_le\_two}]
+\label{lem:triple}
+Three distinct points of $\R^3$ have at most two common neighbours. No hard-core
+hypothesis is needed.
+\end{lemma}
+
+\begin{proof}
+Let $a,b,c$ be distinct and $w_1,w_2,w_3$ at distance $1$ from each. Differences
+$w_i - w_j$ are orthogonal to $b-a$ and $c-a$. The four vectors
+$b-a$, $c-a$, $w_2-w_1$, $w_3-w_1$ lie in $\R^3$ and so admit a nontrivial relation,
+which splits into two vanishing halves by orthogonality; the Gram kernel of either half
+collapses two of the five points, contradicting distinctness.
+\end{proof}
+
+\subsection{Shell obstructions}
+
+For $n = 8$ three further patterns are needed, each ruling out a specific contact
+pattern in the \emph{shell} of a particle of degree six. Write $c$ for the central
+particle and $u_0,\dots,u_5$ for its neighbours; recentring at $c$ and rescaling,
+the $u_i - c$ are unit vectors, and the contacts among them are the pairs at inner
+product $1/2$.
+
+\begin{lemma}[\texttt{gram\_det\_zero}]
+\label{lem:gram}
+Any four vectors of $\R^3$ have singular $4 \times 4$ Gram matrix.
+\end{lemma}
+
+\begin{lemma}[the shell patterns \texttt{P1}, \texttt{P4}, \texttt{P5}]
+\label{lem:patterns}
+Let $c, u_0, \dots, u_5$ be distinct particles of a hard-core configuration. None of
+the following three contact patterns occurs.
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+ & contacts among the $u_i$ & $c$ in contact with \\
+\midrule
+$P_1$ & $03,04,05,12,14,15,23,24,34$ & $u_0,\dots,u_5$ \\
+$P_4$ & $01,04,05,12,13,23,25,34,45$ & $u_0,\dots,u_5$ \\
+$P_5$ & $03,04,05,12,14,15,23,25,34$ & $u_1,\dots,u_5$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{lemma}
+
+\begin{proof}[Proof sketch]
+In each case the recentred shell has rank at most three, so by Lemma~\ref{lem:gram}
+every $4\times4$ Gram determinant among the shell vectors vanishes. The prescribed
+contacts fix most entries of the Gram matrix; the vanishing determinants then become
+polynomial equations in the few free entries. For $P_1$ these force
+$x_{02} = x_{13} = -1/3$ and $x_{01} = -7/18$, after which
+$\det G[0,1,4,5]$ has roots $1$ and $7/11$, both exceeding the hard-core ceiling
+$1/2$. For $P_4$ the six free entries lie on a $6$-cycle; opposite-pair determinants
+factor as $(a-1)(b-1)(ab+a+b)$, so hard-core forces $ab+a+b = 0$ exactly, and the
+adjacent-pair determinants $12a^2 - 8ab - 4a + 12b^2 - 4b - 5 = 0$ then leave only
+inadmissible solutions. $P_5$ is a difference-vector variant with no cone vertex.
+Full details are in the formalization, where these three lemmas are
+\texttt{pattern\_p1\_impossible},
+\texttt{pattern\_p4\_impossible} and
+\texttt{pattern\_p5\_impossible}.
+\end{proof}
+
+\begin{remark}
+Lemmas~\ref{lem:notri}--\ref{lem:patterns} do not appear in the literature in this
+form.
+\end{remark}
+
+\section{Six particles}
+\label{sec:six}
+
+This case needs no enumeration and is the model for the rest.
+
+\begin{theorem}
+\label{thm:six}
+$c(6,3) = 12$.
+\end{theorem}
+
+\begin{proof}
+For the upper bound, suppose $X$ is hard-core with $\card X = 6$ and
+$\operatorname{cc}(X) \ge 25$. Since $\operatorname{cc}$ is even, $\operatorname{cc}(X)
+\ge 26$. Every degree is at most $5$, so if at most one vertex had degree $5$ the sum
+would be at most $5 + 5\cdot 4 = 25$; hence there are two vertices $e \ne f$ of degree
+$5$.
+
+Being of degree $5$ in a $6$-element set, $e$ and $f$ are each bonded to everything
+else --- in particular to each other --- and the remaining four particles are common
+neighbours of the bond $ef$. Nine of the thirteen edges are thus accounted for
+($ef$, and four from each of $e$ and $f$), so at least four edges join the four
+ring vertices. A graph on four vertices with four edges contains a cycle, necessarily
+a triangle or a four-cycle, and these are excluded by Lemmas~\ref{lem:notri}
+and~\ref{lem:nosq} respectively (the diagonals of the four-cycle are hard-core, as
+required).
+
+For the lower bound, the regular octahedron with vertices
+$(\pm\tfrac{\sqrt2}{2},0,0)$, $(0,\pm\tfrac{\sqrt2}{2},0)$,
+$(0,0,\pm\tfrac{\sqrt2}{2})$ is hard-core --- adjacent vertices are at distance $1$ and
+antipodal ones at $\sqrt2$ --- and has $12$ contacts.
+\end{proof}
+
+\section{Seven particles}
+\label{sec:seven}
+
+\begin{theorem}
+\label{thm:seven}
+$c(7,3) = 15$.
+\end{theorem}
+
+Here counting no longer suffices and a case analysis begins. Suppose $X$ is hard-core
+with $\card X = 7$ and at least $16$ contacts. Its contact graph is $K_7$ minus at most
+five of the $21$ pairs. Enumerating the $\binom{21}{5} = 20\,349$ five-element sets $R$
+of pairs, it is enough to show that no hard-core realisation exists whose non-contacts
+are contained in $R$ --- taking a \emph{superset} of the actual non-contacts is what
+makes the enumeration finite and every obstruction monotone in the edge set.
+
+For each $R$ we exhibit one witness of one of six kinds, each an instance of a lemma of
+\S\ref{sec:arsenal}:
+
+\begin{center}
+\begin{tabular}{clc}
+\toprule
+kind & obstruction & lemma \\
+\midrule
+0 & five pairwise bonded vertices & \ref{lem:k5} \\
+1 & a bond, a common neighbour bonded to three others & \ref{lem:ringdeg} \\
+2 & a bond with three pairwise bonded common neighbours & \ref{lem:notri} \\
+3 & a bond with a four-cycle among its common neighbours & \ref{lem:nosq} \\
+4 & a bond with a five-cycle among its common neighbours & \ref{lem:nopent} \\
+5 & three vertices with three common neighbours & \ref{lem:triple} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+A witness is a single natural number packing the kind and up to seven vertex labels in
+base $8$; a Boolean function \texttt{killcheck} verifies that the labelled vertices are
+pairwise adjacent as the kind requires, given $R$. The list of $20\,349$ witnesses is
+machine-generated; that \emph{every} case carries a valid one is the single Boolean
+identity
+
+\begin{Verbatim}
+theorem all_killed : killAll combos emin7Certs = true
+\end{Verbatim}
+
+\noindent verified by the kernel in seven chunks of $3000$ (a monolithic fold exceeds
+the kernel's recursion depth) and reassembled. A separate soundness lemma,
+\texttt{killcheck\_sound}, states that a verified witness contradicts the existence of
+a hard-core realisation; it is proved once per kind by discharging to the corresponding
+lemma of \S\ref{sec:arsenal}. Together these give $\operatorname{cc}(X) \le 30$.
+
+The lower bound is the pentagonal bipyramid of \S\ref{sec:constructions}.
+
+\section{Eight particles}
+\label{sec:eight}
+
+\begin{theorem}
+\label{thm:eight}
+$c(8,3) = 18$.
+\end{theorem}
+
+At $n=8$ the complement has up to nine pairs and $\binom{28}{9} \approx 6.9$ million
+cases, so the flat enumeration of \S\ref{sec:seven} is replaced by a search tree. Two
+ingredients make it small enough.
+
+\paragraph{A recursion off $n=7$.} If $X$ is hard-core with $\card X = 8$ and
+$\operatorname{cc}(X) \ge 37$, then every particle has at least four bonds: deleting a
+particle of degree at most three leaves seven particles carrying at least $31$ ordered
+contacts, contradicting Theorem~\ref{thm:seven}. This is
+\texttt{degree\_ge\_four}, and it is why $n=8$ genuinely rests on $n=7$.
+
+\paragraph{Orderly generation.} We may enumerate the particles in order of
+non-increasing degree. A branch in which the maximal possible degree at position $i$
+falls below the minimal possible degree at position $i+1$ is therefore dead, which
+prunes the tree substantially and costs one extra certificate kind.
+
+The search branches on the $28$ pairs in a fixed vertex-major order, deciding each to
+be a contact or a non-contact, and closes a branch as soon as one of ten certificates
+applies: the six of \S\ref{sec:seven}; the three shell patterns of
+Lemma~\ref{lem:patterns}; a vertex with four decided non-contacts (dead by
+\texttt{degree\_ge\_four}); ten decided non-contacts (dead by counting); and the
+degree-order rule above. The resulting tree has $1\,267\,025$ nodes.
+
+The tree is serialized as a list of naturals --- $0$ opens a branch, an odd entry is a
+certificate leaf --- and a walker
+\begin{Verbatim}
+def walk : ℕ → List ℕ → ℕ → List ℕ → List ℕ → Option (List ℕ)
+\end{Verbatim}
+verifies simultaneously that the shape is a complete binary decision tree over the
+pairs and that every leaf certificate holds for the edge and non-edge sets decided on
+the path to it. Coverage of all contact patterns is therefore intrinsic to the shape:
+there is nothing to check separately.
+
+The kernel cannot evaluate the whole walk at once --- the monolithic reduction
+overflows the kernel stack at roughly $1.27$ million nested frames --- so it is checked
+in $264$ subtree-aligned chunks of at most $8000$ nodes and recomposed with three
+structural lemmas (\texttt{walk\_append}, \texttt{walk\_branch},
+\texttt{walk\_fuel\_mono}). Soundness is \texttt{walk\_impossible}: a successful walk of
+any tree is incompatible with a hard-core eight-particle configuration of at least $38$
+ordered contacts. It is proved by induction on the recursion, with one case per
+certificate kind.
+
+The lower bound is the capped pentagonal bipyramid of \S\ref{sec:constructions}.
+
+\section{Nine particles}
+\label{sec:nine}
+
+\begin{theorem}
+\label{thm:nine}
+$c(9,3) = 21$.
+\end{theorem}
+
+At $n=9$ there are $\binom92 = 36$ pairs and the complement of a $22$-contact graph has
+up to $14$ of them. Three things change relative to \S\ref{sec:eight}.
+
+\paragraph{The recursion, one level up.} If $X$ is hard-core with $\card X = 9$ and
+$\operatorname{cc}(X) \ge 43$, then every particle has at least four bonds: deleting one
+of degree at most three leaves eight particles with at least $37$ ordered contacts,
+contradicting Theorem~\ref{thm:eight}. This is \texttt{degree\_ge\_four\_9}, and it is
+why $n=9$ rests on $n=8$ exactly as $n=8$ rests on $n=7$.
+
+\paragraph{Canonical enumeration replaces degree sorting.} The degree-order rule of
+\S\ref{sec:eight} is too weak here. Instead we enumerate only the lexicographically
+maximal representative of each isomorphism class of decided bond patterns: a branch dies
+as soon as some vertex permutation produces a strictly larger bond code. Soundness is
+\texttt{exists\_lexmax\_enum} together with \texttt{bondCode\_lt}, and the certificate
+witnessing a kill is the permutation. This is orderly generation rather than a partial
+symmetry break, and it keeps the tree at $131\,325$ nodes, three orders of magnitude
+below the raw search.
+
+\paragraph{Twenty-three kill kinds.} The ten of \S\ref{sec:eight} survive. The new ones
+close shell and near-shell patterns that first occur at $n=9$, including configurations
+around vertices of degree seven and eight that the lemmas of \S\ref{sec:arsenal} do not
+reach. They are certified by two mechanisms.
+
+\begin{itemize}[leftmargin=*]
+\item \emph{Positivstellensatz certificates.} For most patterns, the Gram-determinant
+  system is infeasible for a reason expressible as an explicit identity: a nonnegative
+  combination of the constraint polynomials and squares that sums to a negative
+  constant. Verifying such a certificate is a polynomial identity check, which the
+  kernel does by \texttt{ring}-style normalisation over $\mathbb{Q}$.
+\item \emph{Interval branch-and-prune over $\mathbb{Q}$} (\texttt{IntervalBP}). Where no
+  low-degree certificate was found, infeasibility is established by exhaustive
+  subdivision of a rational box. Polynomials are carried as lists of
+  (rational coefficient, exponent vector); a Taylor shift moves the origin to the corner
+  of a box, after which a sign inspection of the shifted coefficients yields an exact
+  rational lower bound on the box. Subdivision proceeds dyadically until every leaf box
+  is excluded. Everything is algebraic: the soundness proof uses no analysis, no
+  floating point, and no interval library --- only the shift identity and monotonicity
+  of the bound.
+\end{itemize}
+
+One pattern (\texttt{Q28}) required its own branch-and-prune tree, split across nine
+modules for the kernel.
+
+\begin{remark}
+\texttt{IntervalBP} is not specific to contact numbers: it is a kernel-checkable
+framework for refuting systems of polynomial inequalities over rational boxes, and
+applies wherever a semialgebraic set must be excluded that resists a
+Positivstellensatz certificate of low degree.
+\end{remark}
+
+The tree is verified and recomposed exactly as in \S\ref{sec:eight}, giving
+$\operatorname{cc}(X) \le 42$. The lower bound is the doubly-capped pentagonal bipyramid
+of \S\ref{sec:constructions}.
+
+\section{Minimal rigidity of the maximisers}
+\label{sec:minrigid}
+
+Theorem~\ref{thm:conj52} follows from Theorem~\ref{thm:main} by one further step, which
+costs nothing beyond the cases already proved.
+
+Let $X$ be hard-core with $\card X = n$ and exactly $3n-6$ contacts. The second clause
+of minimal rigidity, ``at least $3n-6$ contacts'', holds with equality. For the first,
+suppose some $v \in X$ touches at most two others. Deleting $v$ removes exactly
+$2\deg(v) \le 4$ from $\operatorname{cc}$, so
+\[
+  \operatorname{cc}(X \setminus \{v\}) \;\ge\; 2(3n-6) - 4 \;=\; 2\bigl(3(n-1)-6\bigr) + 2 ,
+\]
+that is, $X \setminus \{v\}$ is a hard-core packing of $n-1$ balls with at least
+$3(n-1)-6+1$ contacts, exceeding $c(n-1,3)$. So each case rests on its predecessor:
+$n=9$ on $c(8,3)=18$, $n=8$ on $c(7,3)=15$, $n=7$ on $c(6,3)=12$, and $n=6$ on
+$c(5,3)=9$, which is Lemma~\ref{lem:k5}. (The case $n=6$ needs no hard-core hypothesis
+at all, since $c(5,3)=9$ is proved by counting.)
+
+This is the same erase-a-vertex recursion as \texttt{degree\_ge\_four} in
+\S\ref{sec:eight}, run one step lower; in the formalization it is
+\texttt{minDegree\_six} through \texttt{minDegree\_nine}, and the packaged statements
+\texttt{conj52\_six} through \texttt{conj52\_nine}.
+
+\begin{remark}
+The structural half of Conjecture~\ref{conj:bk} is asserted for \emph{all} $n \ge 6$,
+and in that generality it is out of reach of this method --- or of any finite
+computation --- because $c(n,3)$ is unknown for every $n \ge 10$. What is proved here
+are its instances at $n = 6,\dots,9$, which is every $n$ for which
+Conjecture~\ref{conj:bk} itself asserts a value.
+\end{remark}
+
+\section{The extremal configurations}
+\label{sec:constructions}
+
+Each of the following is verified in the formalization to be hard-core and to have the
+stated number of contacts, with exact algebraic coordinates.
+
+\begin{itemize}[leftmargin=*]
+\item $n=6$: the regular \textbf{octahedron}, vertices
+  $(\pm\tfrac{\sqrt2}{2},0,0)$ and cyclic; $12$ contacts.
+\item $n=7$: the \textbf{pentagonal bipyramid} with unit edges. With
+  $t = \sqrt{10 - 2\sqrt5}$, the equatorial pentagon is
+  $\bigl(\tfrac{(5+\sqrt5)t}{20},0,0\bigr)$ and its rotations, and the apexes are
+  $\bigl(0,0,\pm\tfrac{\sqrt5\,t}{10}\bigr)$; $15$ contacts. The apexes are at
+  distance $\tfrac{\sqrt5\,t}{5} \approx 1.0515 > 1$ and so are \emph{not} in contact.
+\item $n=8$: the \textbf{capped pentagonal bipyramid}, obtained by placing an eighth
+  particle in contact with one equatorial edge and one apex; $18$ contacts.
+\item $n=9$: the \textbf{doubly-capped pentagonal bipyramid}, with a ninth particle
+  capping a second face; $21$ contacts.
+\end{itemize}
+
+Hard-coreness and the contact count are theorems about the exact coordinates, not
+numerical checks.
+
+\section{What is not proved}
+\label{sec:notproved}
+
+We are explicit, because Conjecture~\ref{conj:bk} contains more than
+Theorem~\ref{thm:main} delivers.
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{Not minimal rigidity in general.} We prove the structural half of
+  Conjecture~\ref{conj:bk} at $n = 6,\dots,9$ (\S\ref{sec:minrigid}); the conjecture
+  asserts it for every $n \ge 6$, and for $n \ge 10$ it remains open. This is the only
+  part of Conjecture~\ref{conj:bk} that survives, and no finite computation can reach
+  it, since $c(n,3)$ is unknown for every $n \ge 10$.
+\item \textbf{Not rigidity.} ``Minimally rigid'' is a counting condition, and the
+  survey notes it is neither sufficient nor necessary for rigidity; indeed
+  \cite[Fig.~1]{BezdekKhan2018} exhibits a minimally rigid $9$-sphere packing that is
+  not rigid. Nothing here asserts that maximum-contact packings are rigid.
+\item \textbf{Not uniqueness.} We prove that the maximum is attained by the listed
+  configurations, not that they are the only maximisers. The enumerations
+  of~\cite{ArkusSIAM2011,HolmesCerfon2016} indicate several combinatorially distinct
+  maximisers at $n = 8$; identifying them rigorously is a separate problem.
+\item \textbf{Not $n \ge 10$.} In particular $c(10,3)$, where the pattern $3n-6$ is
+  believed to break with $c(10,3) = 25$, is untouched.
+\item \textbf{Not a continuous-potential statement.} The model here is exact contact.
+  Transferring these bounds to narrow-well potentials requires quantitative,
+  $\varepsilon$-tolerant versions of the lemmas of \S\ref{sec:arsenal}; the
+  certificates carry margins that make this plausible, but it is not done.
+\end{itemize}
+
+\section{Reproducibility}
+\label{sec:repro}
+
+The development is at
+\url{https://github.com/Pendzoncymisio/contact-numbers-lean}
+\TODO{Zenodo DOI once released}. It depends only on Lean~4
+(toolchain \texttt{leanprover/lean4:v4.32.0}) and \texttt{mathlib} at the matching
+release; there are no other dependencies. After \texttt{lake build}, the command
+
+\begin{Verbatim}
+lake env lean Axioms.lean
+\end{Verbatim}
+
+\noindent prints the axiom dependencies of every theorem in Theorems~\ref{thm:main}
+and~\ref{thm:conj52}, together with the full elaborated statements and the definitions
+they use. The expected output is \texttt{[propext, Classical.choice, Quot.sound]} for
+each.
+
+The development is $20$ modules and $12\,154$ lines. Of these, $5\,777$ lines
+($4.8$\,MB) are machine-generated data --- the $20\,349$ certificates of
+\S\ref{sec:seven} and the serialized tree of \S\ref{sec:eight} --- and the remaining
+$6\,377$ lines are hand-written. There are $271$ kernel evaluation sites
+(\texttt{decide +kernel}) and no other computational steps. Building from source, with
+\texttt{mathlib} already compiled, takes $29$ minutes of wall-clock time on three cores
+of an AMD Ryzen~7 5700G. The serialized tree dominates: its slowest single module takes
+$19.5$ minutes on its own.
+
+The certificate generators (Python) are included for provenance. They are \emph{not}
+part of the trust base: their output is data, and its correctness is established by the
+kernel checks described above, not by the generators being right.
+
+\section{Outlook}
+\label{sec:outlook}
+
+The obstruction-plus-certified-tree architecture is not specific to any one $n$. The
+binding constraints in extending it are the size of the search tree and the fact that
+each new $n$ introduces shell patterns not reached by the existing lemmas ---
+\texttt{IntervalBP} was built precisely because that gap opened at $n=9$.
+
+The next target is $n = 10$, and it is qualitatively different from everything above.
+There the pattern $3n-6$ is believed to break, with $c(10,3) = 25 > 24$. Proving it
+requires a $25$-contact construction \emph{and} a matching upper bound, and the
+recursion used throughout this paper --- delete a low-degree particle and appeal to the
+previous case --- no longer bites in the same way, because $25$ exceeds what
+$c(9,3) = 21$ constrains. It would be the first rigorous determination of a contact
+number exceeding $3n-6$, and the first point at which the small-$n$ pattern is known,
+rather than believed, to fail.
+
+Beyond the exact ladder, the asymptotic problem is a separate programme with separate
+tools: $c(n,3) = 6n - \Theta(n^{2/3})$ is provable by counting and isoperimetry rather
+than enumeration, and sharpening the constant in the $n^{2/3}$ term --- the discrete
+Wulff-shape problem --- is where a proof of three-dimensional crystallization would
+have to begin. No amount of exact small-$n$ data approaches it.
+
+\section*{Use of AI assistance}
+
+All mathematical content of this paper --- statements, proofs, certificate generators,
+and the Lean~4 formalization --- was developed in collaboration with Claude (Anthropic),
+operating as an autonomous agent under the author's direction. The author is solely
+responsible for the work. Every theorem asserted here is checked by the Lean~4 kernel
+and depends only on Lean's three standard axioms (\texttt{propext},
+\texttt{Classical.choice}, \texttt{Quot.sound}); readers are invited to verify this
+independently by running \texttt{lake env lean Axioms.lean} in the accompanying
+repository, as described in \S\ref{sec:repro}. All bibliographic references have been
+checked against the primary sources.
+
+\appendix
+
+\section{The certificate kinds}
+\label{app:certs}
+
+\TODO{table of the ten kinds for $n=8$: payload layout, the Boolean check, and the
+lemma of \S\ref{sec:arsenal} that discharges it}
+
+\section{On the preprint of Reid}
+\label{app:reid}
+
+Reid~\cite{Reid2016} claims to prove $C(6)=12$, $C(7)=15$, $C(8)=18$ and announces
+proofs of $C(9)=21$ through $C(13)=36$. We record why the argument does not establish
+its conclusions.
+
+The proof of $C(6)=12$ proceeds entirely by counting degrees. Assuming a packing of six
+balls with $13$ contacts, it deduces that at least two balls have degree $5$, says
+``no other spheres have degree $5$, so at most $2$ spheres have degree $4$, and the
+other two spheres have at most degree $3$'', and concludes from $2\cdot4 + 2\cdot3 = 14
+< 16$. Neither assertion is justified, and the second is false: the graph $K_6$ minus a
+perfect matching on four of its vertices has $13$ edges and degree sequence
+$(5,5,4,4,4,4)$, satisfying every constraint derived up to that point. The preceding
+step likewise yields only $\sum_{i\le4} \deg x_i \le 16$ against a requirement of
+$\ge 16$, which is not a contradiction.
+
+More fundamentally, the argument uses no geometric hypothesis at all: it manipulates
+only degree sequences. No such argument can succeed, because a graph on six vertices
+with $13$ edges exists. That $13$ contacts are impossible is a fact about $\R^3$, and
+some input from the geometry of $\R^3$ is unavoidable --- in the present paper it is
+Lemmas~\ref{lem:notri} and~\ref{lem:nosq}.
+
+The arguments for $n = 7$ and $n = 8$ are case splits over degree sequences in which
+every case is discharged by appeal to ``Lemmas 1--6''. Those lemmas carry the entire
+geometric content of the paper and are stated without proof.
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}

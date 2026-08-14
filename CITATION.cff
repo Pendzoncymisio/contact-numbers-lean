@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this development, please cite it as below."
+title: "Exact contact numbers for packings of six to nine congruent balls: a Lean 4 formalization"
+abstract: >-
+  A machine-checked proof that the contact numbers of packings of n congruent balls
+  in Euclidean 3-space satisfy c(n,3) = 3n - 6 for n = 6, 7, 8, 9, and that every
+  packing attaining these values is minimally rigid. This settles the numerical half
+  of Conjecture 5.2 of Bezdek and Khan, and its structural half at every n for which
+  that conjecture asserts a value. Formalized in Lean 4 on top of mathlib.
+type: software
+authors:
+  - given-names: Marek
+    family-names: Wrzos
+    email: marek.wrzos.sgh@gmail.com
+    orcid: "https://orcid.org/0009-0005-1521-2633"
+    affiliation: "Independent researcher"
+license: Apache-2.0
+repository-code: "https://github.com/Pendzoncymisio/contact-numbers-lean"
+keywords:
+  - contact number
+  - sphere packing
+  - discrete geometry
+  - Bezdek-Khan conjecture
+  - Lean 4
+  - formal verification
+  - interactive theorem proving

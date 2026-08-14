@@ -1,0 +1,22 @@
+# Lake build output and the vendored dependency tree.
+# NOTE: .lake/packages here is a symlink into a local Mathlib checkout; it must
+# never be committed.
+/.lake/
+**/*.olean
+**/*.ilean
+**/*.trace
+**/*.hash
+
+# LaTeX build products
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.fdb_latexmk
+paper/*.fls
+paper/*.log
+paper/*.out
+paper/*.synctex.gz
+paper/*.pdf
+
+__pycache__/
+*.pyc

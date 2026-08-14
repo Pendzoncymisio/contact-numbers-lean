@@ -1,0 +1,39 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the project
+        uses: leanprover/lean-action@v1
+        with:
+          use-mathlib-cache: true
+
+      - name: Check the trust base
+        run: |
+          lake env lean Axioms.lean | tee axioms.txt
+          echo "--- every theorem must depend on exactly the three standard axioms ---"
+          # fail if any reported axiom set is not exactly the standard three
+          if grep 'depends on axioms' axioms.txt \
+               | grep -v '\[propext, Classical.choice, Quot.sound\]'; then
+            echo "::error::a theorem depends on a non-standard axiom"
+            exit 1
+          fi
+          # fail if nothing was checked at all
+          n=$(grep -c 'depends on axioms' axioms.txt)
+          echo "checked $n theorems"
+          test "$n" -ge 8
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: axioms
+          path: axioms.txt

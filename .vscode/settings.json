@@ -1,0 +1,7 @@
+{
+  // Built with pdflatex to match arXiv's default engine, so LaTeX Workshop's
+  // stock recipe is correct. Note: this system's /etc/latexmkrc leaves
+  // $pdf_mode at 0 (DVI, no PDF at all); paper/.latexmkrc overrides it.
+  "latex-workshop.latex.recipe.default": "latexmk",
+  "latex-workshop.view.pdf.viewer": "tab"
+}
