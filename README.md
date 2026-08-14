@@ -83,8 +83,10 @@ lake exe cache get     # prebuilt mathlib oleans
 lake build
 ```
 
-Expect roughly 30–90 minutes for this project on top of mathlib, depending on cores.
-The serialized search trees dominate.
+On four cores of an AMD Ryzen 7 5700G this project takes a few hours on top of
+mathlib, dominated by the serialized search trees and the `Emin9Q28TreeS*` subdivision
+group. The CI run linked by the badge above builds it from scratch on a clean machine
+and is the reliable figure.
 
 ## Checking what is assumed
 
@@ -106,18 +108,22 @@ the definitions they are built from.
 
 ## Machine-generated content
 
-Of 12,154 lines, **5,777 (4.8 MB) are machine-generated data** — the 20,349
-certificates for `n = 7` (`Emin7Cert.lean`) and the serialized search trees for `n = 8`
-and `n = 9` (`Emin8Tree*.lean`, `Emin9*Tree*.lean`, `Emin9Q28TreeS*.lean`). These are
-lists of natural numbers, not proofs.
+Of 60 modules and 50,810 lines, **44 modules and 41,463 lines (12.7 MB) are
+machine-emitted** — the certificates for `n = 7` (`Emin7Cert.lean`), the serialized
+search trees for `n = 8` and `n = 9` (`Emin8Tree*`, `Emin9TreeC*`, `Emin9Q*Tree*`), the
+Positivstellensatz witnesses (`Emin9P*`, `Emin9Q*`), and the tree recompositions
+(`Emin8Final`, `Emin9Final`). These are data and mechanically produced terms, not
+hand-written proofs.
 
 The generators that produced them are in `scripts/`, and are **not part of the trust
 base** — see `scripts/README.md`. A bug in a generator can only produce a certificate
 that the kernel rejects; it cannot produce a false theorem.
 
-The hand-written mathematics is the remaining 6,377 lines, principally `Contact3.lean`
-(the local geometry), `Emin7.lean`, `Emin8.lean`, `Emin9.lean` (the reductions and
-soundness proofs), `Emin8Kills.lean` and `IntervalBP.lean`.
+The hand-written mathematics is the other 16 modules, 9,347 lines: `Basic`, `Frame`,
+`Contact3` (the local geometry), `GroundStates3`, `Emin7`, `Emin8`, `Emin9` (the
+reductions and their soundness proofs), `Emin8Kills`, `Emin9Kills`, `Emin9Canon`,
+`Bipyramid7`, `Cap8`, `Cap9` (the constructions), `IntervalBP`, `MinDegree` and
+`Interface`. There are 4,445 kernel evaluation sites (`decide +kernel`).
 
 ## Provenance and naming
 

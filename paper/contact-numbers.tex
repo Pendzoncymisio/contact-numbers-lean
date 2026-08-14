@@ -104,7 +104,9 @@ proved
 \[
   c(n,3) < 6n - 0.926\, n^{2/3} \qquad (n \ge 2),
 \]
-later improved in~\cite{BezdekReid2013}; the leading constant $6$ reflects the kissing
+later improved in~\cite{BezdekReid2013}; for packings of balls of \emph{differing}
+radii the corresponding average-degree bound is due to Glazyrin~\cite{Glazyrin2020}. The
+leading constant $6$ reflects the kissing
 number of $\R^3$ and the $n^{2/3}$ correction the surface of the cluster. For small
 $n$, however, the truth is much smaller than $6n$: a contact graph that is planar has
 at most $3n-6$ edges, and $3n-6$ is also the count in Maxwell's
@@ -206,6 +208,24 @@ the extra axiom \texttt{Lean.ofReduceBool}; all finite checks are performed by t
 kernel itself (\texttt{decide +kernel}). The geometry is the twelve lemmas of
 \S\ref{sec:arsenal}, each with a short conventional proof; only the case coverage is
 mechanical. Reproduction is described in \S\ref{sec:repro}.
+
+\subsection*{Related formal work}
+
+Computer-assisted proof in sphere packing has an established formal precedent: the
+Flyspeck project verified Hales's proof of the Kepler conjecture in HOL~Light and
+Isabelle~\cite{Flyspeck2017}. That concerns packing \emph{density} for infinite
+packings, a different problem, but it settled the methodological question of whether a
+proof of this shape can be put on a formal footing.
+
+The interval branch-and-prune of \S\ref{sec:nine} has direct antecedents in that work:
+Solovyev and Hales~\cite{SolovyevHales2013} verified the roughly one thousand nonlinear
+inequalities of Flyspeck in HOL~Light using interval arithmetic with Taylor
+approximations. The method used here is the same idea specialised and simplified --- the
+inequalities are polynomial with rational coefficients, so the arithmetic can be exact
+and the soundness argument purely algebraic, with no floating point and no analysis.
+
+No contact number, and no kissing number, appears to have been formalized in any proof
+assistant before.
 
 \subsection*{A previous claim}
 
@@ -609,10 +629,14 @@ prunes the tree substantially and costs one extra certificate kind.
 
 The search branches on the $28$ pairs in a fixed vertex-major order, deciding each to
 be a contact or a non-contact, and closes a branch as soon as one of ten certificates
-applies: the six of \S\ref{sec:seven}; the three shell patterns of
-Lemma~\ref{lem:patterns}; a vertex with four decided non-contacts (dead by
-\texttt{degree\_ge\_four}); ten decided non-contacts (dead by counting); and the
-degree-order rule above. The resulting tree has $1\,267\,025$ nodes.
+applies. Three of the six kinds of \S\ref{sec:seven} carry over --- $K_5$, a ring vertex
+of degree three, and a triple with three common neighbours --- joined by an edge with
+six common neighbours (Lemma~\ref{lem:ringfive}), the three shell patterns of
+Lemma~\ref{lem:patterns}, a vertex with four decided non-contacts (dead by
+\texttt{degree\_ge\_four}), ten decided non-contacts (dead by counting), and the
+degree-order rule above. The ring four- and five-cycles of \S\ref{sec:seven} are not
+needed as separate kinds here. The full list is Appendix~\ref{app:certs}, and the
+resulting tree has $1\,267\,025$ nodes.
 
 The tree is serialized as a list of naturals --- $0$ opens a branch, an odd entry is a
 certificate leaf --- and a walker
@@ -661,7 +685,9 @@ witnessing a kill is the permutation. This is orderly generation rather than a p
 symmetry break, and it keeps the tree at $131\,325$ nodes, three orders of magnitude
 below the raw search.
 
-\paragraph{Twenty-three kill kinds.} The ten of \S\ref{sec:eight} survive. The new ones
+\paragraph{Twenty-three kill kinds.} Nine of the ten of \S\ref{sec:eight} survive
+unchanged; the degree-order rule is replaced by the canonicity rule just described. The
+thirteen new ones
 close shell and near-shell patterns that first occur at $n=9$, including configurations
 around vertices of degree seven and eight that the lemmas of \S\ref{sec:arsenal} do not
 reach. They are certified by two mechanisms.
@@ -798,14 +824,13 @@ and~\ref{thm:conj52}, together with the full elaborated statements and the defin
 they use. The expected output is \texttt{[propext, Classical.choice, Quot.sound]} for
 each.
 
-The development is $20$ modules and $12\,154$ lines. Of these, $5\,777$ lines
-($4.8$\,MB) are machine-generated data --- the $20\,349$ certificates of
-\S\ref{sec:seven} and the serialized tree of \S\ref{sec:eight} --- and the remaining
-$6\,377$ lines are hand-written. There are $271$ kernel evaluation sites
-(\texttt{decide +kernel}) and no other computational steps. Building from source, with
-\texttt{mathlib} already compiled, takes $29$ minutes of wall-clock time on three cores
-of an AMD Ryzen~7 5700G. The serialized tree dominates: its slowest single module takes
-$19.5$ minutes on its own.
+The development is $60$ modules and $50\,810$ lines. The mathematics is $16$ of those
+modules and $9\,347$ lines: the definitions, the lemmas of \S\ref{sec:arsenal}, the
+reductions and their soundness proofs, and \texttt{IntervalBP}. The other $44$ modules,
+$41\,463$ lines and $12.7$\,MB, are machine-emitted --- the certificates of
+\S\ref{sec:seven}, the serialized trees of \S\S\ref{sec:eight}--\ref{sec:nine}, the
+Positivstellensatz witnesses, and the branch-and-prune subdivisions. There are $4\,445$
+kernel evaluation sites (\texttt{decide +kernel}) and no other computational steps.
 
 The certificate generators (Python) are included for provenance. They are \emph{not}
 part of the trust base: their output is data, and its correctness is established by the
@@ -851,8 +876,78 @@ checked against the primary sources.
 \section{The certificate kinds}
 \label{app:certs}
 
-\TODO{table of the ten kinds for $n=8$: payload layout, the Boolean check, and the
-lemma of \S\ref{sec:arsenal} that discharges it}
+A certificate is a single natural number. Its kind is the residue modulo $16$; the
+payload is read off as base-$8$ digits above that, so field $k$ is
+$\lfloor \mathrm{cert}/(16\cdot 8^{k})\rfloor \bmod 8$, giving up to eight vertex labels
+of a nine-point configuration. A Boolean function (\texttt{checkCert}) tests the payload
+against the edges and non-edges decided on the path to the leaf; a soundness lemma, one
+case per kind, turns a passing test into a contradiction with the lemma named in the
+last column. Kinds are monotone in the edge set: they inspect only pairs already decided
+to be contacts, which is what allows a branch to be closed before all pairs are decided.
+
+\medskip
+\noindent\textbf{The ten kinds for $n = 8$.}
+
+\begin{center}
+\small
+\begin{tabular}{cl p{5.1cm} l}
+\toprule
+kind & payload & the branch is dead because & discharged by \\
+\midrule
+0 & $v$                       & $v$ has four decided non-contacts, so degree $\le 3$
+                              & \texttt{degree\_ge\_four} \\
+1 & ---                       & ten decided non-contacts, so at most $18$ contacts
+                              & counting \\
+2 & $a,b,c,d,e$               & five pairwise touching balls
+                              & Lemma~\ref{lem:k5} \\
+3 & $u,v,c,x,y,z$             & a ring vertex touching three others
+                              & Lemma~\ref{lem:ringdeg} \\
+4 & $u,v,w_1,\dots,w_6$       & a contact with six common neighbours
+                              & Lemma~\ref{lem:ringfive} \\
+5 & $a,b,c,w_1,w_2,w_3$       & three balls with three common neighbours
+                              & Lemma~\ref{lem:triple} \\
+6 & $u_0,\dots,u_5,c$         & shell pattern $P_1$
+                              & Lemma~\ref{lem:patterns} \\
+7 & $u_0,\dots,u_5,c$         & shell pattern $P_4$
+                              & Lemma~\ref{lem:patterns} \\
+8 & $u_0,\dots,u_5,c$         & shell pattern $P_5$
+                              & Lemma~\ref{lem:patterns} \\
+9 & $i$                       & degree at position $i+1$ exceeds that at position $i$
+                              & \texttt{exists\_sorted\_enum} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent\textbf{The twenty-three kinds for $n = 9$.} Kinds $0$--$8$ are as above. Kind
+$9$ becomes the canonicity rule of \S\ref{sec:nine}, whose payload is a vertex
+permutation and which is discharged by \texttt{exists\_lexmax\_enum} together with
+\texttt{bondCode\_lt}. Kinds $10$--$22$ are further contact patterns, each ruled out by
+its own lemma:
+
+\begin{center}
+\small
+\begin{tabular}{ll@{\qquad}ll}
+\toprule
+kind & lemma & kind & lemma \\
+\midrule
+10 & \texttt{pattern\_p6\_impossible}      & 17 & \texttt{pattern\_q10\_impossible} \\
+11 & \texttt{pattern\_obs7\_impossible}    & 18 & \texttt{pattern\_q1\_impossible} \\
+12 & \texttt{pattern\_obs3\_impossible}    & 19 & \texttt{pattern\_q12\_impossible} \\
+13 & \texttt{pattern\_obs0\_impossible}    & 20 & \texttt{pattern\_q28\_impossible} \\
+14 & \texttt{pattern\_class23\_impossible} & 21 & \texttt{pattern\_q30\_impossible} \\
+15 & \texttt{pattern\_q0\_impossible}      & 22 & \texttt{pattern\_q37\_impossible} \\
+16 & \texttt{pattern\_q4\_impossible}      &    & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Kinds $10$--$14$ are closed by rational determinant chains or by explicit
+Positivstellensatz certificates. Among the \texttt{q} patterns, \texttt{q0},
+\texttt{q4} and \texttt{q10} carry Positivstellensatz certificates; \texttt{q1},
+\texttt{q12}, \texttt{q28}, \texttt{q30} and \texttt{q37} need the interval
+branch-and-prune of \S\ref{sec:nine} and carry their own subdivision trees, that of
+\texttt{q28} split across nine modules.
 
 \section{On the preprint of Reid}
 \label{app:reid}
