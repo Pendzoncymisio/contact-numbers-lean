@@ -13,27 +13,52 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # mathlib's oleans are ~5.9 GB and this project's are ~4.3 GB, against the
+      # ~14 GB free on a stock runner. Reclaim the preinstalled toolchains.
+      - name: Free disk space
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+                      /usr/local/share/boost /usr/share/swift \
+                      /opt/hostedtoolcache/CodeQL "$AGENT_TOOLSDIRECTORY" || true
+          sudo apt-get clean
+          echo "--- after ---"; df -h /
+
+      # Individual modules hold large environments; give the kernel headroom.
+      - name: Add swap
+        run: |
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
+
       - name: Build the project
         uses: leanprover/lean-action@v1
         with:
           use-mathlib-cache: true
 
+      - name: Disk and memory after build
+        if: always()
+        run: |
+          df -h /
+          free -h
+          du -sh .lake/build 2>/dev/null || true
+
       - name: Check the trust base
         run: |
           lake env lean Axioms.lean | tee axioms.txt
-          echo "--- every theorem must depend on exactly the three standard axioms ---"
-          # fail if any reported axiom set is not exactly the standard three
           if grep 'depends on axioms' axioms.txt \
                | grep -v '\[propext, Classical.choice, Quot.sound\]'; then
             echo "::error::a theorem depends on a non-standard axiom"
             exit 1
           fi
-          # fail if nothing was checked at all
           n=$(grep -c 'depends on axioms' axioms.txt)
           echo "checked $n theorems"
           test "$n" -ge 8
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: axioms
           path: axioms.txt
