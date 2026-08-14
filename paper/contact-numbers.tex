@@ -49,7 +49,6 @@
 \newcommand{\card}[1]{\lvert #1 \rvert}
 \newcommand{\norm}[1]{\lVert #1 \rVert}
 \newcommand{\inner}[2]{\langle #1, #2 \rangle}
-\newcommand{\TODO}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
 
 \title{Exact contact numbers for packings of six to nine\\
        congruent balls, formally verified}
@@ -810,8 +809,9 @@ Theorem~\ref{thm:main} delivers.
 \label{sec:repro}
 
 The development is at
-\url{https://github.com/Pendzoncymisio/contact-numbers-lean}
-\TODO{Zenodo DOI once released}. It depends only on Lean~4
+\url{https://github.com/Pendzoncymisio/contact-numbers-lean} and is archived at
+\href{https://doi.org/10.5281/zenodo.21935524}{\texttt{doi:10.5281/zenodo.21935524}},
+which resolves to the current version. It depends only on Lean~4
 (toolchain \texttt{leanprover/lean4:v4.32.0}) and \texttt{mathlib} at the matching
 release; there are no other dependencies. After \texttt{lake build}, the command
 

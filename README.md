@@ -1,6 +1,7 @@
 # Exact contact numbers for packings of six to nine congruent balls
 
 [![build](https://github.com/Pendzoncymisio/contact-numbers-lean/actions/workflows/build.yml/badge.svg)](https://github.com/Pendzoncymisio/contact-numbers-lean/actions/workflows/build.yml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21935524.svg)](https://doi.org/10.5281/zenodo.21935524)
 
 A Lean 4 formalization of
 
@@ -161,7 +162,8 @@ development they were extracted from.
 
 ## Citing
 
-See `CITATION.cff`.
+Archived at [doi:10.5281/zenodo.21935524](https://doi.org/10.5281/zenodo.21935524)
+(concept DOI — always resolves to the current version). See `CITATION.cff`.
 
 ## Licence
 
