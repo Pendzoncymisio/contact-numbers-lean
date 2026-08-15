@@ -2,6 +2,11 @@ import ContactNumbers.Emin9Kills
 
 set_option linter.style.header false
 set_option maxHeartbeats 3200000
+-- `lo` is a parameter name throughout this file. It collides with a mathlib global
+-- of the same name that is now deprecated, which makes the deprecation linter fire on
+-- our own binders. Renaming is not an option: the generated tree files pass `lo` as a
+-- named argument at 1992 call sites.
+set_option linter.deprecated false
 
 /-!
 # Interval branch-and-prune certificates over ℚ
@@ -50,24 +55,24 @@ lemma evalPoly_flatMap {α : Type} (L : List α) (f : α → Poly) (s : List ℝ
   | cons a L ih =>
     simp [List.flatMap_cons, evalPoly_append, ih]
 
-/-- Expand one term `c · Π sᵢ^{eᵢ}` under `s = lows + t` (binomial expansion). -/
+/-- Expand one term `c · Π sᵢ^{eᵢ}` under `s = lo + t` (binomial expansion). -/
 def expandTerm (c : ℚ) : List ℕ → List ℚ → Poly
   | [], _ => [(c, [])]
   | e :: es, [] => (expandTerm c es []).map (fun t => (t.1, e :: t.2))
-  | e :: es, l :: lows =>
-    (expandTerm c es lows).flatMap (fun t =>
+  | e :: es, l :: lo =>
+    (expandTerm c es lo).flatMap (fun t =>
       (List.range (e + 1)).map (fun k =>
         (t.1 * (e.choose k : ℚ) * l ^ (e - k), k :: t.2)))
 
-/-- Shift a polynomial to the corner `lows`. -/
-def shiftPoly (P : Poly) (lows : List ℚ) : Poly :=
-  P.flatMap (fun t => expandTerm t.1 t.2 lows)
+/-- Shift a polynomial to the corner `lo`. -/
+def shiftPoly (P : Poly) (lo : List ℚ) : Poly :=
+  P.flatMap (fun t => expandTerm t.1 t.2 lo)
 
 /-- Translate a real point by a rational corner (ragged tails untouched). -/
 def addLo : List ℚ → List ℝ → List ℝ
   | [], t => t
   | _ :: _, [] => []
-  | l :: lows, x :: t => ((l : ℝ) + x) :: addLo lows t
+  | l :: lo, x :: t => ((l : ℝ) + x) :: addLo lo t
 
 /-- ℚ-side monomial evaluation. -/
 def evalMonoQ : List ℚ → List ℕ → ℚ
@@ -92,19 +97,19 @@ private lemma binom_eval (x : ℝ) (l : ℚ) (e : ℕ) :
   intro k hk
   ring
 
-lemma expandTerm_eval (c : ℚ) (es : List ℕ) (lows : List ℚ) (t : List ℝ)
-    (hlo : lows.length = es.length) (ht : t.length = es.length) :
-    evalPoly (expandTerm c es lows) t = (c : ℝ) * evalMono (addLo lows t) es := by
-  induction es generalizing lows t c with
+lemma expandTerm_eval (c : ℚ) (es : List ℕ) (lo : List ℚ) (t : List ℝ)
+    (hlo : lo.length = es.length) (ht : t.length = es.length) :
+    evalPoly (expandTerm c es lo) t = (c : ℝ) * evalMono (addLo lo t) es := by
+  induction es generalizing lo t c with
   | nil =>
-    have h1 : lows = [] := List.length_eq_zero_iff.mp hlo
+    have h1 : lo = [] := List.length_eq_zero_iff.mp hlo
     have h2 : t = [] := List.length_eq_zero_iff.mp ht
     subst h1; subst h2
     simp [expandTerm, evalPoly, evalMono, addLo]
   | cons e es ih =>
-    cases lows with
+    cases lo with
     | nil => simp at hlo
-    | cons l lows' =>
+    | cons l lo' =>
       cases t with
       | nil => simp at ht
       | cons x t' =>
@@ -140,19 +145,19 @@ lemma expandTerm_eval (c : ℚ) (es : List ℕ) (lows : List ℚ) (t : List ℝ)
             intro k _
             ring]
           rw [binom_eval]
-        calc ((expandTerm c es lows').map (fun p =>
+        calc ((expandTerm c es lo').map (fun p =>
                 evalPoly ((List.range (e + 1)).map (fun k =>
                   (p.1 * (e.choose k : ℚ) * l ^ (e - k), k :: p.2))) (x :: t'))).sum
-            = ((expandTerm c es lows').map (fun p =>
+            = ((expandTerm c es lo').map (fun p =>
                 ((p.1 : ℝ) * evalMono t' p.2) * (((l : ℝ) + x) ^ e))).sum := by
               congr 1
               apply List.map_congr_left
               intro p _
               rw [hterm p]
-          _ = (((expandTerm c es lows').map (fun p =>
+          _ = (((expandTerm c es lo').map (fun p =>
                 (p.1 : ℝ) * evalMono t' p.2)).sum) * (((l : ℝ) + x) ^ e) := by
               rw [← List.sum_map_mul_right]
-          _ = evalPoly (expandTerm c es lows') t' * (((l : ℝ) + x) ^ e) := by
+          _ = evalPoly (expandTerm c es lo') t' * (((l : ℝ) + x) ^ e) := by
               congr 1
               have hgen : ∀ L : Poly,
                   (L.map (fun p => (p.1 : ℝ) * evalMono t' p.2)).sum
@@ -164,23 +169,23 @@ lemma expandTerm_eval (c : ℚ) (es : List ℕ) (lows : List ℚ) (t : List ℝ)
                   obtain ⟨cc, ees⟩ := q
                   simp [ihq]
               exact hgen _
-          _ = (c : ℝ) * (((l : ℝ) + x) ^ e * evalMono (addLo lows' t') es) := by
-              rw [ih c lows' t' hlo ht]
+          _ = (c : ℝ) * (((l : ℝ) + x) ^ e * evalMono (addLo lo' t') es) := by
+              rw [ih c lo' t' hlo ht]
               ring
 
 /-- Shift correctness: evaluating the shifted polynomial at `t` is evaluating
-the original at `lows + t`. -/
-lemma evalPoly_shiftPoly (P : Poly) (lows : List ℚ) (t : List ℝ)
-    (hlen : ∀ p ∈ P, (p.2 : List ℕ).length = lows.length)
-    (ht : t.length = lows.length) :
-    evalPoly (shiftPoly P lows) t = evalPoly P (addLo lows t) := by
+the original at `lo + t`. -/
+lemma evalPoly_shiftPoly (P : Poly) (lo : List ℚ) (t : List ℝ)
+    (hlen : ∀ p ∈ P, (p.2 : List ℕ).length = lo.length)
+    (ht : t.length = lo.length) :
+    evalPoly (shiftPoly P lo) t = evalPoly P (addLo lo t) := by
   induction P with
   | nil => simp [shiftPoly]
   | cons p ps ih =>
     obtain ⟨c, es⟩ := p
-    have hes : es.length = lows.length := hlen (c, es) (by simp)
+    have hes : es.length = lo.length := hlen (c, es) (by simp)
     simp only [shiftPoly, List.flatMap_cons, evalPoly_append]
-    rw [expandTerm_eval c es lows t hes.symm (by rw [ht, hes])]
+    rw [expandTerm_eval c es lo t hes.symm (by rw [ht, hes])]
     have := ih (fun q hq => hlen q (List.mem_cons_of_mem _ hq))
     simp only [shiftPoly] at this
     rw [this]
@@ -413,20 +418,20 @@ def ibpWalk (dets minors : List Poly) : ℕ → List ℕ → List ℚ → List �
     Option (List ℕ)
   | 0, _, _, _ => none
   | _ + 1, [], _, _ => none
-  | fuel + 1, 0 :: k :: rest, lows, w =>
+  | fuel + 1, 0 :: k :: rest, lo, w =>
     let w2 := w.set k (w.getD k 0 / 2)
-    match ibpWalk dets minors fuel rest lows w2 with
+    match ibpWalk dets minors fuel rest lo w2 with
     | none => none
     | some rest2 =>
-      ibpWalk dets minors fuel rest2 (lows.set k (lows.getD k 0 + w.getD k 0 / 2)) w2
-  | _fuel + 1, 1 :: kind :: idx :: rest, lows, w =>
+      ibpWalk dets minors fuel rest2 (lo.set k (lo.getD k 0 + w.getD k 0 / 2)) w2
+  | _fuel + 1, 1 :: kind :: idx :: rest, lo, w =>
     if kind == 0 then
-      if 0 < lowBound (combinePoly (shiftPoly (dets.getD idx []) lows)) w then some rest else none
+      if 0 < lowBound (combinePoly (shiftPoly (dets.getD idx []) lo)) w then some rest else none
     else if kind == 1 then
-      if 0 < lowBound (combinePoly (shiftPoly (negPoly (dets.getD idx [])) lows)) w then some rest
+      if 0 < lowBound (combinePoly (shiftPoly (negPoly (dets.getD idx [])) lo)) w then some rest
       else none
     else if kind == 2 then
-      if 0 < lowBound (combinePoly (shiftPoly (negPoly (minors.getD idx [])) lows)) w then some rest
+      if 0 < lowBound (combinePoly (shiftPoly (negPoly (minors.getD idx [])) lo)) w then some rest
       else none
     else none
   | _ + 1, _ :: _, _, _ => none
@@ -440,54 +445,54 @@ namespace Kissing3D
 namespace IBP
 
 /-- Exponent lengths are preserved by term expansion. -/
-lemma expandTerm_length (c : ℚ) (es : List ℕ) (lows : List ℚ) :
-    ∀ q ∈ expandTerm c es lows, (q.2 : List ℕ).length = es.length := by
-  induction es generalizing lows c with
+lemma expandTerm_length (c : ℚ) (es : List ℕ) (lo : List ℚ) :
+    ∀ q ∈ expandTerm c es lo, (q.2 : List ℕ).length = es.length := by
+  induction es generalizing lo c with
   | nil =>
     intro q hq
     simp [expandTerm] at hq
     simp [hq]
   | cons e es ih =>
     intro q hq
-    cases lows with
+    cases lo with
     | nil =>
       simp only [expandTerm, List.mem_map] at hq
       obtain ⟨p, hp, rfl⟩ := hq
       simp [ih c [] p hp]
-    | cons l lows' =>
+    | cons l lo' =>
       simp only [expandTerm, List.mem_flatMap, List.mem_map] at hq
       obtain ⟨p, hp, k, _, rfl⟩ := hq
-      simp [ih c lows' p hp]
+      simp [ih c lo' p hp]
 
-lemma shiftPoly_length (P : Poly) (lows : List ℚ) :
-    ∀ q ∈ shiftPoly P lows, ∃ p ∈ P, (q.2 : List ℕ).length = (p.2 : List ℕ).length := by
+lemma shiftPoly_length (P : Poly) (lo : List ℚ) :
+    ∀ q ∈ shiftPoly P lo, ∃ p ∈ P, (q.2 : List ℕ).length = (p.2 : List ℕ).length := by
   intro q hq
   simp only [shiftPoly, List.mem_flatMap] at hq
   obtain ⟨p, hp, hq2⟩ := hq
-  exact ⟨p, hp, expandTerm_length p.1 p.2 lows q hq2⟩
+  exact ⟨p, hp, expandTerm_length p.1 p.2 lo q hq2⟩
 
-/-- Componentwise difference `s − lows` as a real list. -/
+/-- Componentwise difference `s − lo` as a real list. -/
 def subLo : List ℚ → List ℝ → List ℝ
   | [], s => s
   | _ :: _, [] => []
-  | l :: lows, x :: s => (x - (l : ℝ)) :: subLo lows s
+  | l :: lo, x :: s => (x - (l : ℝ)) :: subLo lo s
 
-lemma addLo_subLo (lows : List ℚ) (s : List ℝ) (h : s.length = lows.length) :
-    addLo lows (subLo lows s) = s := by
-  induction lows generalizing s with
+lemma addLo_subLo (lo : List ℚ) (s : List ℝ) (h : s.length = lo.length) :
+    addLo lo (subLo lo s) = s := by
+  induction lo generalizing s with
   | nil => cases s <;> simp [addLo, subLo]
-  | cons l lows' ih =>
+  | cons l lo' ih =>
     cases s with
     | nil => simp at h
     | cons x s' =>
       simp only [List.length_cons, Nat.succ_inj] at h
       simp [addLo, subLo, ih s' h]
 
-lemma subLo_length (lows : List ℚ) (s : List ℝ) (h : s.length = lows.length) :
-    (subLo lows s).length = lows.length := by
-  induction lows generalizing s with
+lemma subLo_length (lo : List ℚ) (s : List ℝ) (h : s.length = lo.length) :
+    (subLo lo s).length = lo.length := by
+  induction lo generalizing s with
   | nil => cases s <;> simp_all [subLo]
-  | cons l lows' ih =>
+  | cons l lo' ih =>
     cases s with
     | nil => simp at h
     | cons x s' =>
@@ -525,17 +530,17 @@ private lemma getD_default' : ∀ (l : List ℚ) (i : ℕ), l.length ≤ i →
   | x :: xs, i + 1, h => by
       simpa using getD_default' xs i (by simpa using h)
 
-private lemma subLo_getD : ∀ (lows : List ℚ) (s : List ℝ), s.length = lows.length →
+private lemma subLo_getD : ∀ (lo : List ℚ) (s : List ℝ), s.length = lo.length →
     ∀ i, i < s.length →
-    (subLo lows s).getD i 0 = s.getD i 0 - ((lows.getD i 0 : ℚ) : ℝ)
+    (subLo lo s).getD i 0 = s.getD i 0 - ((lo.getD i 0 : ℚ) : ℝ)
   | [], s, h, i, hi => by
       rw [h] at hi
       simp at hi
-  | l :: lows', [], h, i, hi => by simp at hi
-  | l :: lows', x :: s', h, 0, hi => by simp [subLo, List.getD]
-  | l :: lows', x :: s', h, i + 1, hi => by
+  | l :: lo', [], h, i, hi => by simp at hi
+  | l :: lo', x :: s', h, 0, hi => by simp [subLo, List.getD]
+  | l :: lo', x :: s', h, i + 1, hi => by
       simp only [subLo, List.getD_cons_succ]
-      exact subLo_getD lows' s' (by simpa using h) i (by simpa using hi)
+      exact subLo_getD lo' s' (by simpa using h) i (by simpa using hi)
 
 /-- **Walker soundness**: a successful walk over a box containing a point where
 all `dets` vanish and all `minors` are nonnegative is impossible. -/
@@ -543,40 +548,40 @@ theorem ibpWalk_impossible (dets minors : List Poly) (s : List ℝ)
     (hdets : ∀ P ∈ dets, evalPoly P s = 0)
     (hminors : ∀ P ∈ minors, 0 ≤ evalPoly P s)
     (harity : ∀ P ∈ dets ++ minors, ∀ p ∈ P, (p.2 : List ℕ).length = s.length) :
-    ∀ (fuel : ℕ) (data : List ℕ) (lows w : List ℚ) (rest : List ℕ),
-    ibpWalk dets minors fuel data lows w = some rest →
-    lows.length = s.length → w.length = s.length →
+    ∀ (fuel : ℕ) (data : List ℕ) (lo w : List ℚ) (rest : List ℕ),
+    ibpWalk dets minors fuel data lo w = some rest →
+    lo.length = s.length → w.length = s.length →
     (∀ i, i < s.length →
-      ((lows.getD i 0 : ℚ) : ℝ) ≤ s.getD i 0 ∧
-        s.getD i 0 ≤ (((lows.getD i 0 + w.getD i 0) : ℚ) : ℝ)) →
+      ((lo.getD i 0 : ℚ) : ℝ) ≤ s.getD i 0 ∧
+        s.getD i 0 ≤ (((lo.getD i 0 + w.getD i 0) : ℚ) : ℝ)) →
     (∀ x ∈ w, (0:ℚ) ≤ x) → False := by
   intro fuel
   induction fuel with
   | zero =>
-    intro data lows w rest hwalk
+    intro data lo w rest hwalk
     simp [ibpWalk] at hwalk
   | succ fuel ih =>
-    intro data lows w rest hwalk hlo hw hbox hwnn
+    intro data lo w rest hwalk hlo hw hbox hwnn
     match data with
     | [] => simp [ibpWalk] at hwalk
     | 0 :: k :: rest' =>
-      rw [show ibpWalk dets minors (fuel + 1) (0 :: k :: rest') lows w
+      rw [show ibpWalk dets minors (fuel + 1) (0 :: k :: rest') lo w
           = (let w2 := w.set k (w.getD k 0 / 2)
-             match ibpWalk dets minors fuel rest' lows w2 with
+             match ibpWalk dets minors fuel rest' lo w2 with
              | none => none
              | some rest2 =>
                ibpWalk dets minors fuel rest2
-                 (lows.set k (lows.getD k 0 + w.getD k 0 / 2)) w2) from rfl] at hwalk
+                 (lo.set k (lo.getD k 0 + w.getD k 0 / 2)) w2) from rfl] at hwalk
       simp only at hwalk
       set w2 := w.set k (w.getD k 0 / 2) with hw2
-      cases hleft : ibpWalk dets minors fuel rest' lows w2 with
+      cases hleft : ibpWalk dets minors fuel rest' lo w2 with
       | none => rw [hleft] at hwalk; simp at hwalk
       | some rest2 =>
         rw [hleft] at hwalk
         simp only at hwalk
-        by_cases hside : s.getD k 0 ≤ (((lows.getD k 0 + w.getD k 0 / 2) : ℚ) : ℝ)
+        by_cases hside : s.getD k 0 ≤ (((lo.getD k 0 + w.getD k 0 / 2) : ℚ) : ℝ)
         · -- point is in the left half-box
-          refine ih rest' lows w2 rest2 hleft hlo ?_ ?_ ?_
+          refine ih rest' lo w2 rest2 hleft hlo ?_ ?_ ?_
           · rw [hw2]
             simp [List.length_set, hw]
           · intro i hi
@@ -607,7 +612,7 @@ theorem ibpWalk_impossible (dets minors : List Poly) (s : List ℝ)
               linarith
         · -- point is in the right half-box
           push Not at hside
-          refine ih rest2 (lows.set k (lows.getD k 0 + w.getD k 0 / 2)) w2 rest hwalk
+          refine ih rest2 (lo.set k (lo.getD k 0 + w.getD k 0 / 2)) w2 rest hwalk
             ?_ ?_ ?_ ?_
           · simp [List.length_set, hlo]
           · rw [hw2]; simp [List.length_set, hw]
@@ -615,9 +620,9 @@ theorem ibpWalk_impossible (dets minors : List Poly) (s : List ℝ)
             obtain ⟨h1, h2⟩ := hbox i hi
             by_cases hik : i = k
             · subst hik
-              have hlo' : (lows.set i (lows.getD i 0 + w.getD i 0 / 2)).getD i 0
-                  = lows.getD i 0 + w.getD i 0 / 2 :=
-                getD_set_self' lows i _ (by rw [hlo]; exact hi)
+              have hlo' : (lo.set i (lo.getD i 0 + w.getD i 0 / 2)).getD i 0
+                  = lo.getD i 0 + w.getD i 0 / 2 :=
+                getD_set_self' lo i _ (by rw [hlo]; exact hi)
               have hw2' : w2.getD i 0 = w.getD i 0 / 2 := by
                 rw [hw2]
                 exact getD_set_self' w i _ (by rw [hw]; exact hi)
@@ -629,9 +634,9 @@ theorem ibpWalk_impossible (dets minors : List Poly) (s : List ℝ)
               · push_cast
                 push_cast at h2
                 linarith
-            · have hlo' : (lows.set k (lows.getD k 0 + w.getD k 0 / 2)).getD i 0
-                  = lows.getD i 0 :=
-                getD_set_ne' lows k i (fun h => hik h.symm) _
+            · have hlo' : (lo.set k (lo.getD k 0 + w.getD k 0 / 2)).getD i 0
+                  = lo.getD i 0 :=
+                getD_set_ne' lo k i (fun h => hik h.symm) _
               have hw2' : w2.getD i 0 = w.getD i 0 := by
                 rw [hw2]
                 exact getD_set_ne' w k i (fun h => hik h.symm) _
@@ -648,24 +653,24 @@ theorem ibpWalk_impossible (dets minors : List Poly) (s : List ℝ)
                 · rw [getD_default' w k (by omega)]
               linarith
     | 1 :: kind :: idx :: rest' =>
-      rw [show ibpWalk dets minors (fuel + 1) (1 :: kind :: idx :: rest') lows w
+      rw [show ibpWalk dets minors (fuel + 1) (1 :: kind :: idx :: rest') lo w
           = (if kind == 0 then
-              if 0 < lowBound (combinePoly (shiftPoly (dets.getD idx []) lows)) w then some rest'
+              if 0 < lowBound (combinePoly (shiftPoly (dets.getD idx []) lo)) w then some rest'
               else none
             else if kind == 1 then
-              if 0 < lowBound (combinePoly (shiftPoly (negPoly (dets.getD idx [])) lows)) w then
+              if 0 < lowBound (combinePoly (shiftPoly (negPoly (dets.getD idx [])) lo)) w then
                 some rest' else none
             else if kind == 2 then
-              if 0 < lowBound (combinePoly (shiftPoly (negPoly (minors.getD idx [])) lows)) w then
+              if 0 < lowBound (combinePoly (shiftPoly (negPoly (minors.getD idx [])) lo)) w then
                 some rest' else none
             else none) from rfl] at hwalk
-      -- shared facts: the shifted point t = s − lows lies in [0, w]
-      set t := subLo lows s with htdef
-      have htlen : t.length = lows.length := subLo_length lows s hlo.symm
+      -- shared facts: the shifted point t = s − lo lies in [0, w]
+      set t := subLo lo s with htdef
+      have htlen : t.length = lo.length := subLo_length lo s hlo.symm
       have htgetD : ∀ i, i < s.length →
-          t.getD i 0 = s.getD i 0 - ((lows.getD i 0 : ℚ) : ℝ) := by
+          t.getD i 0 = s.getD i 0 - ((lo.getD i 0 : ℚ) : ℝ) := by
         rw [htdef]
-        exact subLo_getD lows s hlo.symm
+        exact subLo_getD lo s hlo.symm
       have hslen : s.length = t.length := by rw [htlen, hlo]
       have ht0 : ∀ x ∈ t, (0:ℝ) ≤ x := by
         intro x hx
@@ -686,33 +691,33 @@ theorem ibpWalk_impossible (dets minors : List Poly) (s : List ℝ)
         push_cast at this ⊢
         linarith
       have hwt : w.length = t.length := by rw [htlen, hw, hlo]
-      have haddback : addLo lows t = s := by
+      have haddback : addLo lo t = s := by
         rw [htdef]
-        exact addLo_subLo lows s hlo.symm
+        exact addLo_subLo lo s hlo.symm
       -- generic leaf discharge
       have hleaf : ∀ (P : Poly), evalPoly P s ≤ 0 →
           (∀ p ∈ P, (p.2 : List ℕ).length = s.length) →
-          ¬ (0 < lowBound (combinePoly (shiftPoly P lows)) w) := by
+          ¬ (0 < lowBound (combinePoly (shiftPoly P lo)) w) := by
         intro P hPle hPar hpos
-        have harshift : ∀ q ∈ combinePoly (shiftPoly P lows),
+        have harshift : ∀ q ∈ combinePoly (shiftPoly P lo),
             (q.2 : List ℕ).length ≤ t.length := by
           intro q hq
-          obtain ⟨p1, hp1, hql⟩ := combinePoly_length (shiftPoly P lows) q hq
-          obtain ⟨p, hp, hqlen⟩ := shiftPoly_length P lows p1 hp1
+          obtain ⟨p1, hp1, hql⟩ := combinePoly_length (shiftPoly P lo) q hq
+          obtain ⟨p, hp, hqlen⟩ := shiftPoly_length P lo p1 hp1
           rw [hql, hqlen, hPar p hp, hslen]
-        have hb := lowBound_le (combinePoly (shiftPoly P lows)) w t ht0 htw hwt
+        have hb := lowBound_le (combinePoly (shiftPoly P lo)) w t ht0 htw hwt
           harshift hwnn
-        have hsh : evalPoly (combinePoly (shiftPoly P lows)) t
-            = evalPoly P (addLo lows t) := by
+        have hsh : evalPoly (combinePoly (shiftPoly P lo)) t
+            = evalPoly P (addLo lo t) := by
           rw [evalPoly_combinePoly]
           apply evalPoly_shiftPoly
           · intro p hp
             rw [hPar p hp, hlo]
           · rw [htlen]
         rw [hsh, haddback] at hb
-        have hle0 : ((lowBound (combinePoly (shiftPoly P lows)) w : ℚ) : ℝ) ≤ 0 :=
+        have hle0 : ((lowBound (combinePoly (shiftPoly P lo)) w : ℚ) : ℝ) ≤ 0 :=
           le_trans hb hPle
-        have h0 : (0:ℝ) < ((lowBound (combinePoly (shiftPoly P lows)) w : ℚ) : ℝ) := by
+        have h0 : (0:ℝ) < ((lowBound (combinePoly (shiftPoly P lo)) w : ℚ) : ℝ) := by
           exact_mod_cast hpos
         linarith
       have hgetPoly : ∀ (L : List Poly) (i : ℕ),
@@ -758,7 +763,7 @@ theorem ibpWalk_impossible (dets minors : List Poly) (s : List ℝ)
       by_cases hk0 : kind = 0
       · subst hk0
         simp only [beq_self_eq_true, if_true] at hwalk
-        by_cases hcond : 0 < lowBound (combinePoly (shiftPoly (dets.getD idx []) lows)) w
+        by_cases hcond : 0 < lowBound (combinePoly (shiftPoly (dets.getD idx []) lo)) w
         · exact hleaf (dets.getD idx []) (le_of_eq (hgetPoly dets idx hdets))
             (hdetAr idx) hcond
         · rw [if_neg hcond] at hwalk
@@ -812,32 +817,32 @@ namespace IBP
 /-- Composition: a sub-walk returning remainder `r` extends over an appended
 tail. -/
 lemma ibpWalk_append (dets minors : List Poly) {fuel : ℕ}
-    {l1 l2 r : List ℕ} {lows w : List ℚ}
-    (h : ibpWalk dets minors fuel l1 lows w = some r) :
-    ibpWalk dets minors fuel (l1 ++ l2) lows w = some (r ++ l2) := by
-  induction fuel generalizing l1 r lows w with
+    {l1 l2 r : List ℕ} {lo w : List ℚ}
+    (h : ibpWalk dets minors fuel l1 lo w = some r) :
+    ibpWalk dets minors fuel (l1 ++ l2) lo w = some (r ++ l2) := by
+  induction fuel generalizing l1 r lo w with
   | zero => simp [ibpWalk] at h
   | succ fuel ih =>
     match l1 with
     | [] => simp [ibpWalk] at h
     | 0 :: k :: rest =>
-      rw [show ibpWalk dets minors (fuel + 1) (0 :: k :: rest) lows w
+      rw [show ibpWalk dets minors (fuel + 1) (0 :: k :: rest) lo w
           = (let w2 := w.set k (w.getD k 0 / 2)
-             match ibpWalk dets minors fuel rest lows w2 with
+             match ibpWalk dets minors fuel rest lo w2 with
              | none => none
              | some rest2 =>
                ibpWalk dets minors fuel rest2
-                 (lows.set k (lows.getD k 0 + w.getD k 0 / 2)) w2) from rfl] at h
+                 (lo.set k (lo.getD k 0 + w.getD k 0 / 2)) w2) from rfl] at h
       rw [show (0 :: k :: rest) ++ l2 = 0 :: k :: (rest ++ l2) from rfl,
-        show ibpWalk dets minors (fuel + 1) (0 :: k :: (rest ++ l2)) lows w
+        show ibpWalk dets minors (fuel + 1) (0 :: k :: (rest ++ l2)) lo w
           = (let w2 := w.set k (w.getD k 0 / 2)
-             match ibpWalk dets minors fuel (rest ++ l2) lows w2 with
+             match ibpWalk dets minors fuel (rest ++ l2) lo w2 with
              | none => none
              | some rest2 =>
                ibpWalk dets minors fuel rest2
-                 (lows.set k (lows.getD k 0 + w.getD k 0 / 2)) w2) from rfl]
+                 (lo.set k (lo.getD k 0 + w.getD k 0 / 2)) w2) from rfl]
       simp only at h ⊢
-      cases hw : ibpWalk dets minors fuel rest lows (w.set k (w.getD k 0 / 2)) with
+      cases hw : ibpWalk dets minors fuel rest lo (w.set k (w.getD k 0 / 2)) with
       | none => rw [hw] at h; simp at h
       | some rest2 =>
         rw [hw] at h
@@ -846,28 +851,28 @@ lemma ibpWalk_append (dets minors : List Poly) {fuel : ℕ}
         simp only
         exact ih h
     | 1 :: kind :: idx :: rest =>
-      rw [show ibpWalk dets minors (fuel + 1) (1 :: kind :: idx :: rest) lows w
+      rw [show ibpWalk dets minors (fuel + 1) (1 :: kind :: idx :: rest) lo w
           = (if kind == 0 then
-              if 0 < lowBound (combinePoly (shiftPoly (dets.getD idx []) lows)) w then some rest
+              if 0 < lowBound (combinePoly (shiftPoly (dets.getD idx []) lo)) w then some rest
               else none
             else if kind == 1 then
-              if 0 < lowBound (combinePoly (shiftPoly (negPoly (dets.getD idx [])) lows)) w then
+              if 0 < lowBound (combinePoly (shiftPoly (negPoly (dets.getD idx [])) lo)) w then
                 some rest else none
             else if kind == 2 then
-              if 0 < lowBound (combinePoly (shiftPoly (negPoly (minors.getD idx [])) lows)) w then
+              if 0 < lowBound (combinePoly (shiftPoly (negPoly (minors.getD idx [])) lo)) w then
                 some rest else none
             else none) from rfl] at h
       rw [show (1 :: kind :: idx :: rest) ++ l2 = 1 :: kind :: idx :: (rest ++ l2)
           from rfl,
-        show ibpWalk dets minors (fuel + 1) (1 :: kind :: idx :: (rest ++ l2)) lows w
+        show ibpWalk dets minors (fuel + 1) (1 :: kind :: idx :: (rest ++ l2)) lo w
           = (if kind == 0 then
-              if 0 < lowBound (combinePoly (shiftPoly (dets.getD idx []) lows)) w then
+              if 0 < lowBound (combinePoly (shiftPoly (dets.getD idx []) lo)) w then
                 some (rest ++ l2) else none
             else if kind == 1 then
-              if 0 < lowBound (combinePoly (shiftPoly (negPoly (dets.getD idx [])) lows)) w then
+              if 0 < lowBound (combinePoly (shiftPoly (negPoly (dets.getD idx [])) lo)) w then
                 some (rest ++ l2) else none
             else if kind == 2 then
-              if 0 < lowBound (combinePoly (shiftPoly (negPoly (minors.getD idx [])) lows)) w then
+              if 0 < lowBound (combinePoly (shiftPoly (negPoly (minors.getD idx [])) lo)) w then
                 some (rest ++ l2) else none
             else none) from rfl]
       split_ifs at h ⊢ <;> simp_all
@@ -877,16 +882,16 @@ lemma ibpWalk_append (dets minors : List Poly) {fuel : ℕ}
 
 /-- Fuel monotonicity. -/
 lemma ibpWalk_fuel_mono (dets minors : List Poly) {f f' : ℕ} (hf : f ≤ f') :
-    ∀ {d : List ℕ} {lows w : List ℚ} {r : List ℕ},
-    ibpWalk dets minors f d lows w = some r →
-    ibpWalk dets minors f' d lows w = some r := by
+    ∀ {d : List ℕ} {lo w : List ℚ} {r : List ℕ},
+    ibpWalk dets minors f d lo w = some r →
+    ibpWalk dets minors f' d lo w = some r := by
   induction f' generalizing f with
   | zero =>
-    intro d lows w r h
+    intro d lo w r h
     interval_cases f
     simp [ibpWalk] at h
   | succ f' ih =>
-    intro d lows w r h
+    intro d lo w r h
     match f, h with
     | 0, h => simp [ibpWalk] at h
     | f + 1, h =>
@@ -894,22 +899,22 @@ lemma ibpWalk_fuel_mono (dets minors : List Poly) {f f' : ℕ} (hf : f ≤ f') :
       match d with
       | [] => simp [ibpWalk] at h
       | 0 :: k :: rest =>
-        rw [show ibpWalk dets minors (f + 1) (0 :: k :: rest) lows w
+        rw [show ibpWalk dets minors (f + 1) (0 :: k :: rest) lo w
             = (let w2 := w.set k (w.getD k 0 / 2)
-               match ibpWalk dets minors f rest lows w2 with
+               match ibpWalk dets minors f rest lo w2 with
                | none => none
                | some rest2 =>
                  ibpWalk dets minors f rest2
-                   (lows.set k (lows.getD k 0 + w.getD k 0 / 2)) w2) from rfl] at h
-        rw [show ibpWalk dets minors (f' + 1) (0 :: k :: rest) lows w
+                   (lo.set k (lo.getD k 0 + w.getD k 0 / 2)) w2) from rfl] at h
+        rw [show ibpWalk dets minors (f' + 1) (0 :: k :: rest) lo w
             = (let w2 := w.set k (w.getD k 0 / 2)
-               match ibpWalk dets minors f' rest lows w2 with
+               match ibpWalk dets minors f' rest lo w2 with
                | none => none
                | some rest2 =>
                  ibpWalk dets minors f' rest2
-                   (lows.set k (lows.getD k 0 + w.getD k 0 / 2)) w2) from rfl]
+                   (lo.set k (lo.getD k 0 + w.getD k 0 / 2)) w2) from rfl]
         simp only at h ⊢
-        cases hw : ibpWalk dets minors f rest lows (w.set k (w.getD k 0 / 2)) with
+        cases hw : ibpWalk dets minors f rest lo (w.set k (w.getD k 0 / 2)) with
         | none => rw [hw] at h; simp at h
         | some rest2 =>
           rw [hw] at h
@@ -918,26 +923,26 @@ lemma ibpWalk_fuel_mono (dets minors : List Poly) {f f' : ℕ} (hf : f ≤ f') :
           simp only
           exact ih hff h
       | 1 :: kind :: idx :: rest =>
-        rw [show ibpWalk dets minors (f + 1) (1 :: kind :: idx :: rest) lows w
+        rw [show ibpWalk dets minors (f + 1) (1 :: kind :: idx :: rest) lo w
             = (if kind == 0 then
-                if 0 < lowBound (combinePoly (shiftPoly (dets.getD idx []) lows)) w then some rest
+                if 0 < lowBound (combinePoly (shiftPoly (dets.getD idx []) lo)) w then some rest
                 else none
               else if kind == 1 then
-                if 0 < lowBound (combinePoly (shiftPoly (negPoly (dets.getD idx [])) lows)) w then
+                if 0 < lowBound (combinePoly (shiftPoly (negPoly (dets.getD idx [])) lo)) w then
                   some rest else none
               else if kind == 2 then
-                if 0 < lowBound (combinePoly (shiftPoly (negPoly (minors.getD idx [])) lows)) w then
+                if 0 < lowBound (combinePoly (shiftPoly (negPoly (minors.getD idx [])) lo)) w then
                   some rest else none
               else none) from rfl] at h
-        rw [show ibpWalk dets minors (f' + 1) (1 :: kind :: idx :: rest) lows w
+        rw [show ibpWalk dets minors (f' + 1) (1 :: kind :: idx :: rest) lo w
             = (if kind == 0 then
-                if 0 < lowBound (combinePoly (shiftPoly (dets.getD idx []) lows)) w then some rest
+                if 0 < lowBound (combinePoly (shiftPoly (dets.getD idx []) lo)) w then some rest
                 else none
               else if kind == 1 then
-                if 0 < lowBound (combinePoly (shiftPoly (negPoly (dets.getD idx [])) lows)) w then
+                if 0 < lowBound (combinePoly (shiftPoly (negPoly (dets.getD idx [])) lo)) w then
                   some rest else none
               else if kind == 2 then
-                if 0 < lowBound (combinePoly (shiftPoly (negPoly (minors.getD idx [])) lows)) w then
+                if 0 < lowBound (combinePoly (shiftPoly (negPoly (minors.getD idx [])) lo)) w then
                   some rest else none
               else none) from rfl]
         exact h
@@ -947,22 +952,22 @@ lemma ibpWalk_fuel_mono (dets minors : List Poly) {f f' : ℕ} (hf : f ≤ f') :
 
 /-- Symbolic branch composition for chunked kernel checks. -/
 lemma ibpWalk_branch (dets minors : List Poly) {fuel : ℕ}
-    {dL dR : List ℕ} {k : ℕ} {lows w : List ℚ}
-    (hL : ibpWalk dets minors fuel dL lows (w.set k (w.getD k 0 / 2)) = some [])
+    {dL dR : List ℕ} {k : ℕ} {lo w : List ℚ}
+    (hL : ibpWalk dets minors fuel dL lo (w.set k (w.getD k 0 / 2)) = some [])
     (hR : ibpWalk dets minors fuel dR
-      (lows.set k (lows.getD k 0 + w.getD k 0 / 2)) (w.set k (w.getD k 0 / 2))
+      (lo.set k (lo.getD k 0 + w.getD k 0 / 2)) (w.set k (w.getD k 0 / 2))
       = some []) :
-    ibpWalk dets minors (fuel + 1) ((0 : ℕ) :: k :: (dL ++ dR)) lows w
+    ibpWalk dets minors (fuel + 1) ((0 : ℕ) :: k :: (dL ++ dR)) lo w
       = some [] := by
   have hcomp := ibpWalk_append dets minors (l2 := dR) hL
   rw [List.nil_append] at hcomp
-  rw [show ibpWalk dets minors (fuel + 1) (0 :: k :: (dL ++ dR)) lows w
+  rw [show ibpWalk dets minors (fuel + 1) (0 :: k :: (dL ++ dR)) lo w
       = (let w2 := w.set k (w.getD k 0 / 2)
-         match ibpWalk dets minors fuel (dL ++ dR) lows w2 with
+         match ibpWalk dets minors fuel (dL ++ dR) lo w2 with
          | none => none
          | some rest2 =>
            ibpWalk dets minors fuel rest2
-             (lows.set k (lows.getD k 0 + w.getD k 0 / 2)) w2) from rfl]
+             (lo.set k (lo.getD k 0 + w.getD k 0 / 2)) w2) from rfl]
   simp only
   rw [hcomp]
   simp only
@@ -979,12 +984,12 @@ namespace IBP
 /-- Branch composition with explicit child boxes (the equations are decidable
 ℚ-list computations, dischargeable by `decide`). -/
 lemma ibpWalk_branch' (dets minors : List Poly) {fuel : ℕ}
-    {dL dR : List ℕ} {k : ℕ} {lows w lows' w' : List ℚ}
-    (hL : ibpWalk dets minors fuel dL lows w' = some [])
-    (hR : ibpWalk dets minors fuel dR lows' w' = some [])
+    {dL dR : List ℕ} {k : ℕ} {lo w lo' w' : List ℚ}
+    (hL : ibpWalk dets minors fuel dL lo w' = some [])
+    (hR : ibpWalk dets minors fuel dR lo' w' = some [])
     (hw' : w' = w.set k (w.getD k 0 / 2))
-    (hlo' : lows' = lows.set k (lows.getD k 0 + w.getD k 0 / 2)) :
-    ibpWalk dets minors (fuel + 1) ((0 : ℕ) :: k :: (dL ++ dR)) lows w
+    (hlo' : lo' = lo.set k (lo.getD k 0 + w.getD k 0 / 2)) :
+    ibpWalk dets minors (fuel + 1) ((0 : ℕ) :: k :: (dL ++ dR)) lo w
       = some [] := by
   subst hw'
   subst hlo'
