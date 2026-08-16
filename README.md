@@ -117,7 +117,7 @@ the definitions they are built from.
 
 ## Machine-generated content
 
-Of 60 modules and 50,810 lines, **44 modules and 41,463 lines (12.7 MB) are
+Of 95 modules and 50,216 lines, **79 modules and 40,864 lines (12.7 MB) are
 machine-emitted** — the certificates for `n = 7` (`Emin7Cert.lean`), the serialized
 search trees for `n = 8` and `n = 9` (`Emin8Tree*`, `Emin9TreeC*`, `Emin9Q*Tree*`), the
 Positivstellensatz witnesses (`Emin9P*`, `Emin9Q*`), and the tree recompositions
@@ -128,11 +128,11 @@ The generators that produced them are in `scripts/`, and are **not part of the t
 base** — see `scripts/README.md`. A bug in a generator can only produce a certificate
 that the kernel rejects; it cannot produce a false theorem.
 
-The hand-written mathematics is the other 16 modules, 9,347 lines: `Basic`, `Frame`,
+The hand-written mathematics is the other 16 modules, 9,352 lines: `Basic`, `Frame`,
 `Contact3` (the local geometry), `GroundStates3`, `Emin7`, `Emin8`, `Emin9` (the
 reductions and their soundness proofs), `Emin8Kills`, `Emin9Kills`, `Emin9Canon`,
 `Bipyramid7`, `Cap8`, `Cap9` (the constructions), `IntervalBP`, `MinDegree` and
-`Interface`. There are 4,445 kernel evaluation sites (`decide +kernel`).
+`Interface`. There are 6,437 kernel evaluation sites (`decide +kernel`).
 
 ## Provenance and naming
 

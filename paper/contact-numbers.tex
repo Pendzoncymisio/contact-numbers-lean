@@ -20,6 +20,7 @@
 % The Lean notation, for pdflatex. Declared after inputenc so the mappings also
 % fire inside fancyvrb, which is where the Lean sources are set.
 \DeclareUnicodeCharacter{2200}{\ensuremath{\forall}}
+\DeclareUnicodeCharacter{2203}{\ensuremath{\exists}}
 \DeclareUnicodeCharacter{2208}{\ensuremath{\in}}
 \DeclareUnicodeCharacter{2192}{\ensuremath{\rightarrow}}
 \DeclareUnicodeCharacter{2264}{\ensuremath{\leq}}
@@ -142,6 +143,28 @@ by Connelly and the Demaines. The survey draws the conclusion in one sentence:
 6$.''~\cite[\S5.1]{BezdekKhan2018}
 \end{quote}
 
+\noindent That sentence carries a footnote, which we quote in full because it is the
+strongest statement in the literature against the values being open:
+
+\begin{quote}
+``According to [4], for $n \le 7$, it is possible to solve the system (3) using standard
+algebraic geometry methods for all $A \in \mathcal{A}$ without filtering by geometric
+rules. Arkus et al.\ [4] attempted this using the package \textsc{Singular}. Therefore,
+most likely for $n = 6, 7$, the maximal contact graphs as obtained in [4] are optimal for
+minimally rigid sphere packings.''~\cite[\S5.1, footnote 2]{BezdekKhan2018}
+\end{quote}
+
+\noindent Three things should be said about it. It is hedged (``most likely''). It
+reaches only $n = 6, 7$, so it bears on neither $n = 8$ nor $n = 9$. And it concludes
+optimality \emph{among minimally rigid packings} --- which presupposes that a
+maximum-contact packing is minimally rigid, the very intuition the same survey records as
+unproved: ``Up to our knowledge, there exists no proof of or counterexample to this
+intuition''~\cite[\S5.1]{BezdekKhan2018}. Removing that presupposition is part of what is
+done here: minimal rigidity is not assumed at any point below, it is derived
+(\S\ref{sec:minrigid}). What the footnote does establish is that for $n = 6, 7$ the
+algebraic step was carried out without the error-prone geometric filtering, so the
+residual doubt there is narrower than for $n = 8, 9$.
+
 What the survey \emph{does} prove is a conditional statement, which is the correct
 point of comparison for the present paper:
 
@@ -216,15 +239,21 @@ Isabelle~\cite{Flyspeck2017}. That concerns packing \emph{density} for infinite
 packings, a different problem, but it settled the methodological question of whether a
 proof of this shape can be put on a formal footing.
 
+Closer to the present work, Hariharan, Viazovska and collaborators have formalized
+Viazovska's solution of the sphere packing problem in dimension~8 in Lean, a project
+begun in 2024 and completed in February 2026, with dimension~24 alongside
+it~\cite{SpherePacking8Lean2026}. That is the same prover and the same corner of discrete
+geometry, and it is a far larger development than this one; it is again about density
+rather than contact numbers, and about a single optimal configuration in a high dimension
+rather than exact extremal values for small $n$ in $\R^3$. We know of no formalization of
+a contact number, or of a kissing number, in any proof assistant.
+
 The interval branch-and-prune of \S\ref{sec:nine} has direct antecedents in that work:
 Solovyev and Hales~\cite{SolovyevHales2013} verified the roughly one thousand nonlinear
 inequalities of Flyspeck in HOL~Light using interval arithmetic with Taylor
 approximations. The method used here is the same idea specialised and simplified --- the
 inequalities are polynomial with rational coefficients, so the arithmetic can be exact
 and the soundness argument purely algebraic, with no floating point and no analysis.
-
-No contact number, and no kissing number, appears to have been formalized in any proof
-assistant before.
 
 \subsection*{A previous claim}
 
@@ -278,31 +307,41 @@ noncomputable def contactCount (X : Finset E3) : ℕ :=
 noncomputable def energy (X : Finset E3) : ℝ := -(contactCount X : ℝ) / 2
 \end{Verbatim}
 
-\noindent and Theorem~\ref{thm:main} is the conjunction of the four statements
+\noindent On top of these, \texttt{Interface.lean} states the results in the language of
+the contact-number problem, and it is those statements that
+Theorems~\ref{thm:main} and~\ref{thm:conj52} refer to and that the
+trust-base check reports:
 
 \begin{Verbatim}
-theorem groundState_six :
-    (∀ X : Finset E3, HardCore X → X.card = 6 → -12 ≤ energy X)
-  ∧ HardCore octa ∧ octa.card = 6 ∧ energy octa = -12
+noncomputable def contacts (X : Finset E3) : ℕ := contactCount X / 2
 
-theorem groundState_seven : ... -15 ... bipyr7    ...
-theorem groundState_eight : ... -18 ... capBipyr8 ...
-theorem groundState_nine  : ... -21 ... capBipyr9 ...
+def realised (n : ℕ) : Set ℕ :=
+  {k | ∃ X : Finset E3, HardCore X ∧ X.card = n ∧ contacts X = k}
+
+def MinimallyRigid (X : Finset E3) : Prop :=
+  (∀ v ∈ X, 3 ≤ (neighbors X v).card) ∧ 3 * X.card - 6 ≤ contacts X
+
+theorem contactNumber_six   : IsGreatest (realised 6) 12
+theorem contactNumber_seven : IsGreatest (realised 7) 15
+theorem contactNumber_eight : IsGreatest (realised 8) 18
+theorem contactNumber_nine  : IsGreatest (realised 9) 21
+
+theorem conjecture52_nine :
+    IsGreatest (realised 9) 21 ∧
+    ∀ X : Finset E3, HardCore X → X.card = 9 → contacts X = 21 →
+      MinimallyRigid X
 \end{Verbatim}
 
-\noindent while Theorem~\ref{thm:conj52} is \texttt{conj52\_six} through
-\texttt{conj52\_nine}, of which the last reads
+\noindent \texttt{IsGreatest S c} is \texttt{mathlib}'s ``$c$ is the greatest element of
+$S$'', so \texttt{contactNumber\_nine} is literally $c(9,3) = 21$, and
+\texttt{MinimallyRigid} is Definition~1 of~\cite{BezdekKhan2018} written out. Each of
+these reports the three standard axioms and nothing more.
 
-\begin{Verbatim}
-theorem conj52_nine :
-    (∀ X : Finset E3, HardCore X → X.card = 9 → contactCount X ≤ 42)
-  ∧ (HardCore capBipyr9 ∧ capBipyr9.card = 9 ∧ contactCount capBipyr9 = 42)
-  ∧ (∀ X : Finset E3, HardCore X → X.card = 9 → contactCount X = 42 →
-      (∀ v ∈ X, 3 ≤ (neighbors X v).card) ∧ 42 ≤ contactCount X)
-\end{Verbatim}
-
-\noindent each of which reports the three standard axioms and nothing more. The third
-conjunct is Definition~1 of~\cite{BezdekKhan2018} spelled out.
+We note where the content of \texttt{conjecture52\_nine} lies. Of the two clauses of
+minimal rigidity, the second --- at least $3n-6$ contacts --- is immediate once the
+packing is assumed to attain $c(n,3) = 3n-6$, and is stated only because Definition~1
+includes it. Everything to be proved is in the first clause, that no ball touches fewer
+than three others; that is \S\ref{sec:minrigid}.
 
 \begin{remark}
 Two small facts are used silently throughout. First, $\operatorname{cc}(X)$ is even
@@ -824,13 +863,15 @@ and~\ref{thm:conj52}, together with the full elaborated statements and the defin
 they use. The expected output is \texttt{[propext, Classical.choice, Quot.sound]} for
 each.
 
-The development is $60$ modules and $50\,810$ lines. The mathematics is $16$ of those
-modules and $9\,347$ lines: the definitions, the lemmas of \S\ref{sec:arsenal}, the
-reductions and their soundness proofs, and \texttt{IntervalBP}. The other $44$ modules,
-$41\,463$ lines and $12.7$\,MB, are machine-emitted --- the certificates of
+The development is $95$ modules and $50\,216$ lines. The mathematics is $16$ of those
+modules and $9\,352$ lines: the definitions, the lemmas of \S\ref{sec:arsenal}, the
+reductions and their soundness proofs, and \texttt{IntervalBP}. The other $79$ modules,
+$40\,864$ lines and $12.7$\,MB, are machine-emitted --- the certificates of
 \S\ref{sec:seven}, the serialized trees of \S\S\ref{sec:eight}--\ref{sec:nine}, the
-Positivstellensatz witnesses, and the branch-and-prune subdivisions. There are $4\,445$
-kernel evaluation sites (\texttt{decide +kernel}) and no other computational steps.
+Positivstellensatz witnesses, and the branch-and-prune subdivisions, each split across
+several modules so that no single one exceeds what a continuous-integration job can
+build. There are $6\,437$ kernel evaluation sites (\texttt{decide +kernel}) and no other
+computational steps.
 
 The certificate generators (Python) are included for provenance. They are \emph{not}
 part of the trust base: their output is data, and its correctness is established by the
