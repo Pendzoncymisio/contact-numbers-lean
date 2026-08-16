@@ -2,6 +2,12 @@ name: verify
 
 run-name: "Lean: c(n,3) = 3n-6 for n = 6..9, kernel-checked"
 
+# One verification per branch at a time: a new push supersedes a run still in
+# flight rather than doubling up on a 2.8-hour build.
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]
@@ -45,26 +51,26 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { id: "00", label: "q28+q30", mods: "Emin9Q28TreeS0A Emin9Q30TreeS1" }
-          - { id: "01", label: "q28", mods: "Emin9Q28TreeS1A Emin9Q28TreeS2A" }
-          - { id: "02", label: "q28+q37", mods: "Emin9Q28TreeS0B Emin9Q37TreeS0" }
-          - { id: "03", label: "q28+q12", mods: "Emin9Q28TreeS3B Emin9Q12TreeS6" }
-          - { id: "04", label: "q28+q1", mods: "Emin9Q28TreeS5A Emin9Q1TreeS2" }
-          - { id: "05", label: "q28+q30", mods: "Emin9Q28TreeS8C Emin9Q30TreeS0" }
-          - { id: "06", label: "q28+q12", mods: "Emin9Q28TreeS5C Emin9Q12TreeS5" }
-          - { id: "07", label: "q28+q1", mods: "Emin9Q28TreeS3A Emin9Q1TreeS1" }
-          - { id: "08", label: "q12+q37", mods: "Emin9Q12TreeS4 Emin9Q37TreeS1" }
-          - { id: "09", label: "q28+q37", mods: "Emin9Q28TreeS2C Emin9Q37TreeS2" }
-          - { id: "10", label: "q28", mods: "Emin9Q28TreeS4C Emin9Q28TreeS7B" }
-          - { id: "11", label: "q12+q37", mods: "Emin9Q12TreeS7 Emin9Q37TreeS3" }
-          - { id: "12", label: "q28", mods: "Emin9Q28TreeS3C Emin9Q28TreeS1B" }
-          - { id: "13", label: "q28", mods: "Emin9Q28TreeS5B Emin9Q28TreeS7A" }
-          - { id: "14", label: "q12+q28+emin9canon", mods: "Emin9Q12TreeS0 Emin9Q28TreeS8A Emin9Canon" }
-          - { id: "15", label: "q28", mods: "Emin9Q28TreeS4A Emin9Q28TreeS6A" }
-          - { id: "16", label: "q12+q28", mods: "Emin9Q12TreeS3 Emin9Q28TreeS2B" }
-          - { id: "17", label: "q28+q1", mods: "Emin9Q28TreeS4B Emin9Q1TreeS0" }
-          - { id: "18", label: "q12+q28", mods: "Emin9Q12TreeS2 Emin9Q28TreeS8B" }
-          - { id: "19", label: "q28+q12", mods: "Emin9Q28TreeS6B Emin9Q12TreeS1" }
+          - { id: "00", label: "q28+q30", slug: "q28-q30", mods: "Emin9Q28TreeS0A Emin9Q30TreeS1" }
+          - { id: "01", label: "q28", slug: "q28", mods: "Emin9Q28TreeS1A Emin9Q28TreeS2A" }
+          - { id: "02", label: "q28+q37", slug: "q28-q37", mods: "Emin9Q28TreeS0B Emin9Q37TreeS0" }
+          - { id: "03", label: "q28+q12", slug: "q28-q12", mods: "Emin9Q28TreeS3B Emin9Q12TreeS6" }
+          - { id: "04", label: "q28+q1", slug: "q28-q1", mods: "Emin9Q28TreeS5A Emin9Q1TreeS2" }
+          - { id: "05", label: "q28+q30", slug: "q28-q30", mods: "Emin9Q28TreeS8C Emin9Q30TreeS0" }
+          - { id: "06", label: "q28+q12", slug: "q28-q12", mods: "Emin9Q28TreeS5C Emin9Q12TreeS5" }
+          - { id: "07", label: "q28+q1", slug: "q28-q1", mods: "Emin9Q28TreeS3A Emin9Q1TreeS1" }
+          - { id: "08", label: "q12+q37", slug: "q12-q37", mods: "Emin9Q12TreeS4 Emin9Q37TreeS1" }
+          - { id: "09", label: "q28+q37", slug: "q28-q37", mods: "Emin9Q28TreeS2C Emin9Q37TreeS2" }
+          - { id: "10", label: "q28", slug: "q28", mods: "Emin9Q28TreeS4C Emin9Q28TreeS7B" }
+          - { id: "11", label: "q12+q37", slug: "q12-q37", mods: "Emin9Q12TreeS7 Emin9Q37TreeS3" }
+          - { id: "12", label: "q28", slug: "q28", mods: "Emin9Q28TreeS3C Emin9Q28TreeS1B" }
+          - { id: "13", label: "q28", slug: "q28", mods: "Emin9Q28TreeS5B Emin9Q28TreeS7A" }
+          - { id: "14", label: "q12+q28+emin9canon", slug: "q12-q28-emin9canon", mods: "Emin9Q12TreeS0 Emin9Q28TreeS8A Emin9Canon" }
+          - { id: "15", label: "q28", slug: "q28", mods: "Emin9Q28TreeS4A Emin9Q28TreeS6A" }
+          - { id: "16", label: "q12+q28", slug: "q12-q28", mods: "Emin9Q12TreeS3 Emin9Q28TreeS2B" }
+          - { id: "17", label: "q28+q1", slug: "q28-q1", mods: "Emin9Q28TreeS4B Emin9Q1TreeS0" }
+          - { id: "18", label: "q12+q28", slug: "q12-q28", mods: "Emin9Q12TreeS2 Emin9Q28TreeS8B" }
+          - { id: "19", label: "q28+q12", slug: "q28-q12", mods: "Emin9Q28TreeS6B Emin9Q12TreeS1" }
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/lean-setup
@@ -89,7 +95,7 @@ jobs:
           du -sh out
       - uses: actions/upload-artifact@v7
         with:
-          name: chunk-${{ matrix.id }}
+          name: oleans-${{ matrix.slug }}-${{ matrix.id }}
           path: out
           retention-days: 1
 
@@ -108,7 +114,7 @@ jobs:
           fail-on-cache-miss: true
       - uses: actions/download-artifact@v8
         with:
-          pattern: chunk-*
+          pattern: oleans-*
           merge-multiple: true
           path: chunk-out
       - name: Reassemble the chunk results
@@ -132,5 +138,5 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: axioms
+          name: axiom-check
           path: axioms.txt
