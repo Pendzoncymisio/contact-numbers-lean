@@ -6,77 +6,114 @@ on:
   pull_request:
   workflow_dispatch:
 
-# A full build takes longer than the 6-hour ceiling on a single GitHub-hosted job:
-# one module (Emin9Q10) alone takes over two hours there. So it is split into three
-# chained stages that hand `.lake/build` along through the cache. Stage boundaries
-# come from measured times on a previous run.
-env:
-  # Lake takes its job count from the visible CPU count and this Lake version has no
-  # --jobs flag, so affinity is used to cap concurrent Lean processes. Each holds a
-  # large environment and the runner has only 15 GiB.
-  LAKE: taskset -c 0,1 lake
+# A full build is about 30 CPU-hours, far past the 6-hour ceiling of any single
+# GitHub-hosted job. The module graph is however very wide: 41 of the 95 modules
+# are kernel-checked certificate chunks that depend only on a shared prefix and
+# on nothing else, so they can be built concurrently. The build therefore runs as
+#   prefix  ->  20 parallel chunk jobs  ->  finish + trust-base check
+# handing the prefix along in the cache and the chunk results as artifacts (the
+# chunk oleans total only ~0.4 GB, since they are proof terms rather than data).
 
 jobs:
-  stage1:
-    name: "build through n = 8"
+  prefix:
+    name: prefix
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 340
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/lean-setup
-      - name: Build
-        run: $LAKE build ContactNumbers.Emin8Final
+      - name: Build the shared prefix
+        run: lake build ContactNumbers.Basic ContactNumbers.Bipyramid7 ContactNumbers.Cap8 ContactNumbers.Cap9 ContactNumbers.Contact3 ContactNumbers.Emin7 ContactNumbers.Emin7Cert ContactNumbers.Emin8 ContactNumbers.Emin8Final ContactNumbers.Emin8Kills ContactNumbers.Emin8TreeC0 ContactNumbers.Emin8TreeC1 ContactNumbers.Emin8TreeC2 ContactNumbers.Emin8TreeC3 ContactNumbers.Emin8TreeC4 ContactNumbers.Emin8TreeC5 ContactNumbers.Emin8TreeC6 ContactNumbers.Emin8TreeC7 ContactNumbers.Emin9C23 ContactNumbers.Emin9Kills ContactNumbers.Emin9P0 ContactNumbers.Emin9P3 ContactNumbers.Emin9P7 ContactNumbers.Emin9Q0 ContactNumbers.Emin9Q10 ContactNumbers.Emin9Q12Data ContactNumbers.Emin9Q1Data ContactNumbers.Emin9Q28Data ContactNumbers.Emin9Q30Data ContactNumbers.Emin9Q37Data ContactNumbers.Emin9Q4 ContactNumbers.Frame ContactNumbers.GroundStates3 ContactNumbers.IntervalBP
       - name: Report
         if: always()
         run: df -h / ; free -h ; du -sh .lake/build || true
       - uses: actions/cache/save@v4
-        if: always()
         with:
           path: .lake/build
-          key: lake-${{ github.sha }}-stage1
+          key: prefix-${{ github.sha }}
 
-  stage2:
-    name: "build the n = 9 certificates"
-    needs: stage1
+  chunks:
+    name: "chunks ${{ matrix.id }}"
+    needs: prefix
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { id: "00", mods: "Emin9Q28TreeS0A Emin9Q30TreeS1" }
+          - { id: "01", mods: "Emin9Q28TreeS1A Emin9Q28TreeS2A" }
+          - { id: "02", mods: "Emin9Q28TreeS0B Emin9Q37TreeS0" }
+          - { id: "03", mods: "Emin9Q28TreeS3B Emin9Q12TreeS6" }
+          - { id: "04", mods: "Emin9Q28TreeS5A Emin9Q1TreeS2" }
+          - { id: "05", mods: "Emin9Q28TreeS8C Emin9Q30TreeS0" }
+          - { id: "06", mods: "Emin9Q28TreeS5C Emin9Q12TreeS5" }
+          - { id: "07", mods: "Emin9Q28TreeS3A Emin9Q1TreeS1" }
+          - { id: "08", mods: "Emin9Q12TreeS4 Emin9Q37TreeS1" }
+          - { id: "09", mods: "Emin9Q28TreeS2C Emin9Q37TreeS2" }
+          - { id: "10", mods: "Emin9Q28TreeS4C Emin9Q28TreeS7B" }
+          - { id: "11", mods: "Emin9Q12TreeS7 Emin9Q37TreeS3" }
+          - { id: "12", mods: "Emin9Q28TreeS3C Emin9Q28TreeS1B" }
+          - { id: "13", mods: "Emin9Q28TreeS5B Emin9Q28TreeS7A" }
+          - { id: "14", mods: "Emin9Q12TreeS0 Emin9Q28TreeS8A Emin9Canon" }
+          - { id: "15", mods: "Emin9Q28TreeS4A Emin9Q28TreeS6A" }
+          - { id: "16", mods: "Emin9Q12TreeS3 Emin9Q28TreeS2B" }
+          - { id: "17", mods: "Emin9Q28TreeS4B Emin9Q1TreeS0" }
+          - { id: "18", mods: "Emin9Q12TreeS2 Emin9Q28TreeS8B" }
+          - { id: "19", mods: "Emin9Q28TreeS6B Emin9Q12TreeS1" }
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/lean-setup
       - uses: actions/cache/restore@v4
         with:
           path: .lake/build
-          key: lake-${{ github.sha }}-stage1
+          key: prefix-${{ github.sha }}
           fail-on-cache-miss: true
-      - name: Build
+      - name: Build assigned chunks
         run: |
-          $LAKE build ContactNumbers.Emin9P0 ContactNumbers.Emin9P3 \
-                      ContactNumbers.Emin9Q10 ContactNumbers.Emin9Q28Data \
-                      ContactNumbers.Emin9Q30Tree ContactNumbers.Emin9Canon
-      - name: Report
-        if: always()
-        run: df -h / ; free -h ; du -sh .lake/build || true
-      - uses: actions/cache/save@v4
-        if: always()
+          set -e
+          for m in ${{ matrix.mods }}; do taskset -c 0,1 lake build "ContactNumbers.$m"; done
+      - name: Collect this job's outputs
+        run: |
+          # Lake needs both the olean/ilean/trace and the generated .c in ir/;
+          # without the latter it rebuilds the module from scratch.
+          mkdir -p out/lib out/ir
+          for m in ${{ matrix.mods }}; do
+            cp .lake/build/lib/lean/ContactNumbers/$m.* out/lib/
+            cp .lake/build/ir/ContactNumbers/$m.*      out/ir/
+          done
+          du -sh out
+      - uses: actions/upload-artifact@v4
         with:
-          path: .lake/build
-          key: lake-${{ github.sha }}-stage2
+          name: chunk-${{ matrix.id }}
+          path: out
+          retention-days: 1
 
-  stage3:
-    name: "finish, and check the trust base"
-    needs: stage2
+  finish:
+    name: finish and check the trust base
+    needs: chunks
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 340
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/lean-setup
       - uses: actions/cache/restore@v4
         with:
           path: .lake/build
-          key: lake-${{ github.sha }}-stage2
+          key: prefix-${{ github.sha }}
           fail-on-cache-miss: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: chunk-*
+          merge-multiple: true
+          path: chunk-out
+      - name: Reassemble the chunk results
+        run: |
+          cp chunk-out/lib/* .lake/build/lib/lean/ContactNumbers/
+          cp chunk-out/ir/*  .lake/build/ir/ContactNumbers/
+          echo "oleans present: $(ls .lake/build/lib/lean/ContactNumbers/*.olean | wc -l) of 95"
       - name: Build the remainder
-        run: $LAKE build
+        run: lake build
       - name: Check the trust base
         run: |
           lake env lean Axioms.lean | tee axioms.txt
