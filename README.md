@@ -1,6 +1,7 @@
 # Exact contact numbers for packings of six to nine congruent balls
 
-[![build](https://github.com/Pendzoncymisio/contact-numbers-lean/actions/workflows/build.yml/badge.svg)](https://github.com/Pendzoncymisio/contact-numbers-lean/actions/workflows/build.yml)
+[![verify](https://github.com/Pendzoncymisio/contact-numbers-lean/actions/workflows/build.yml/badge.svg)](https://github.com/Pendzoncymisio/contact-numbers-lean/actions/workflows/build.yml)
+[![paper](https://github.com/Pendzoncymisio/contact-numbers-lean/actions/workflows/paper.yml/badge.svg)](https://github.com/Pendzoncymisio/contact-numbers-lean/actions/workflows/paper.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21935524.svg)](https://doi.org/10.5281/zenodo.21935524)
 
 A Lean 4 formalization of
@@ -171,7 +172,13 @@ the build is warning-free.
 
 ## Paper
 
-`paper/` contains the accompanying preprint (`build.sh`, pdflatex).
+`paper/` contains the accompanying preprint; build it with `paper/build.sh`, which runs
+pdflatex and bibtex. CI compiles it on a stock TeX Live image — the same situation arXiv
+compiles in — and publishes the result as the `preprint-pdf` artifact.
+
+The certificate families named in the verification jobs and their artifacts (`q28`,
+`q12`, `q37`, `q1`, `q30`) are the certificate kinds tabulated in Appendix A of the
+paper, so a failing job names the obstruction involved.
 
 ## Citing
 

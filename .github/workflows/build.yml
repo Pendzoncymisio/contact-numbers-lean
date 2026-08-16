@@ -23,6 +23,10 @@ on:
 #   prefix  ->  20 parallel chunk jobs  ->  finish + trust-base check
 # handing the prefix along in the cache and the chunk results as artifacts (the
 # chunk oleans total only ~0.4 GB, since they are proof terms rather than data).
+#
+# Job and artifact names carry the pattern families each job builds -- q28, q12,
+# q37, q1, q30 -- which are the certificate kinds tabulated in Appendix A of the
+# accompanying paper, so a failure names the obstruction involved.
 
 jobs:
   prefix:
