@@ -47,8 +47,9 @@ jobs:
           if grep -q "TODO" contact-numbers.log; then
             echo "::warning::the document still contains a TODO marker"
           fi
-          pages=$(pdfinfo contact-numbers.pdf 2>/dev/null | awk '/Pages/{print $2}')
-          echo "pages: ${pages:-unknown}"
+          # pdfinfo is not in the TeX Live image; the count is in the log already.
+          grep -oE "Output written on contact-numbers\\.pdf \\([0-9]+ pages" contact-numbers.log \
+            | tail -1 | grep -oE "[0-9]+ pages"
           test "$fail" -eq 0
 
       - uses: actions/upload-artifact@v7
