@@ -1,9 +1,13 @@
-name: build
+name: verify
+
+run-name: "Lean: c(n,3) = 3n-6 for n = 6..9, kernel-checked"
 
 on:
   push:
     branches: [main]
+    paths-ignore: ['README.md', 'paper/**', 'scripts/**', 'CITATION.cff', 'LICENSE', '**.md']
   pull_request:
+    paths-ignore: ['README.md', 'paper/**', 'scripts/**', 'CITATION.cff', 'LICENSE', '**.md']
   workflow_dispatch:
 
 # A full build is about 30 CPU-hours, far past the 6-hour ceiling of any single
@@ -16,24 +20,24 @@ on:
 
 jobs:
   prefix:
-    name: prefix
+    name: "geometry + shared data"
     runs-on: ubuntu-latest
     timeout-minutes: 340
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/lean-setup
       - name: Build the shared prefix
         run: lake build ContactNumbers.Basic ContactNumbers.Bipyramid7 ContactNumbers.Cap8 ContactNumbers.Cap9 ContactNumbers.Contact3 ContactNumbers.Emin7 ContactNumbers.Emin7Cert ContactNumbers.Emin8 ContactNumbers.Emin8Final ContactNumbers.Emin8Kills ContactNumbers.Emin8TreeC0 ContactNumbers.Emin8TreeC1 ContactNumbers.Emin8TreeC2 ContactNumbers.Emin8TreeC3 ContactNumbers.Emin8TreeC4 ContactNumbers.Emin8TreeC5 ContactNumbers.Emin8TreeC6 ContactNumbers.Emin8TreeC7 ContactNumbers.Emin9C23 ContactNumbers.Emin9Kills ContactNumbers.Emin9P0 ContactNumbers.Emin9P3 ContactNumbers.Emin9P7 ContactNumbers.Emin9Q0 ContactNumbers.Emin9Q10 ContactNumbers.Emin9Q12Data ContactNumbers.Emin9Q1Data ContactNumbers.Emin9Q28Data ContactNumbers.Emin9Q30Data ContactNumbers.Emin9Q37Data ContactNumbers.Emin9Q4 ContactNumbers.Frame ContactNumbers.GroundStates3 ContactNumbers.IntervalBP
       - name: Report
         if: always()
         run: df -h / ; free -h ; du -sh .lake/build || true
-      - uses: actions/cache/save@v4
+      - uses: actions/cache/save@v6
         with:
           path: .lake/build
           key: prefix-${{ github.sha }}
 
   chunks:
-    name: "chunks ${{ matrix.id }}"
+    name: "certificates ${{ matrix.label }} (${{ matrix.id }})"
     needs: prefix
     runs-on: ubuntu-latest
     timeout-minutes: 340
@@ -41,30 +45,30 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { id: "00", mods: "Emin9Q28TreeS0A Emin9Q30TreeS1" }
-          - { id: "01", mods: "Emin9Q28TreeS1A Emin9Q28TreeS2A" }
-          - { id: "02", mods: "Emin9Q28TreeS0B Emin9Q37TreeS0" }
-          - { id: "03", mods: "Emin9Q28TreeS3B Emin9Q12TreeS6" }
-          - { id: "04", mods: "Emin9Q28TreeS5A Emin9Q1TreeS2" }
-          - { id: "05", mods: "Emin9Q28TreeS8C Emin9Q30TreeS0" }
-          - { id: "06", mods: "Emin9Q28TreeS5C Emin9Q12TreeS5" }
-          - { id: "07", mods: "Emin9Q28TreeS3A Emin9Q1TreeS1" }
-          - { id: "08", mods: "Emin9Q12TreeS4 Emin9Q37TreeS1" }
-          - { id: "09", mods: "Emin9Q28TreeS2C Emin9Q37TreeS2" }
-          - { id: "10", mods: "Emin9Q28TreeS4C Emin9Q28TreeS7B" }
-          - { id: "11", mods: "Emin9Q12TreeS7 Emin9Q37TreeS3" }
-          - { id: "12", mods: "Emin9Q28TreeS3C Emin9Q28TreeS1B" }
-          - { id: "13", mods: "Emin9Q28TreeS5B Emin9Q28TreeS7A" }
-          - { id: "14", mods: "Emin9Q12TreeS0 Emin9Q28TreeS8A Emin9Canon" }
-          - { id: "15", mods: "Emin9Q28TreeS4A Emin9Q28TreeS6A" }
-          - { id: "16", mods: "Emin9Q12TreeS3 Emin9Q28TreeS2B" }
-          - { id: "17", mods: "Emin9Q28TreeS4B Emin9Q1TreeS0" }
-          - { id: "18", mods: "Emin9Q12TreeS2 Emin9Q28TreeS8B" }
-          - { id: "19", mods: "Emin9Q28TreeS6B Emin9Q12TreeS1" }
+          - { id: "00", label: "q28+q30", mods: "Emin9Q28TreeS0A Emin9Q30TreeS1" }
+          - { id: "01", label: "q28", mods: "Emin9Q28TreeS1A Emin9Q28TreeS2A" }
+          - { id: "02", label: "q28+q37", mods: "Emin9Q28TreeS0B Emin9Q37TreeS0" }
+          - { id: "03", label: "q28+q12", mods: "Emin9Q28TreeS3B Emin9Q12TreeS6" }
+          - { id: "04", label: "q28+q1", mods: "Emin9Q28TreeS5A Emin9Q1TreeS2" }
+          - { id: "05", label: "q28+q30", mods: "Emin9Q28TreeS8C Emin9Q30TreeS0" }
+          - { id: "06", label: "q28+q12", mods: "Emin9Q28TreeS5C Emin9Q12TreeS5" }
+          - { id: "07", label: "q28+q1", mods: "Emin9Q28TreeS3A Emin9Q1TreeS1" }
+          - { id: "08", label: "q12+q37", mods: "Emin9Q12TreeS4 Emin9Q37TreeS1" }
+          - { id: "09", label: "q28+q37", mods: "Emin9Q28TreeS2C Emin9Q37TreeS2" }
+          - { id: "10", label: "q28", mods: "Emin9Q28TreeS4C Emin9Q28TreeS7B" }
+          - { id: "11", label: "q12+q37", mods: "Emin9Q12TreeS7 Emin9Q37TreeS3" }
+          - { id: "12", label: "q28", mods: "Emin9Q28TreeS3C Emin9Q28TreeS1B" }
+          - { id: "13", label: "q28", mods: "Emin9Q28TreeS5B Emin9Q28TreeS7A" }
+          - { id: "14", label: "q12+q28+emin9canon", mods: "Emin9Q12TreeS0 Emin9Q28TreeS8A Emin9Canon" }
+          - { id: "15", label: "q28", mods: "Emin9Q28TreeS4A Emin9Q28TreeS6A" }
+          - { id: "16", label: "q12+q28", mods: "Emin9Q12TreeS3 Emin9Q28TreeS2B" }
+          - { id: "17", label: "q28+q1", mods: "Emin9Q28TreeS4B Emin9Q1TreeS0" }
+          - { id: "18", label: "q12+q28", mods: "Emin9Q12TreeS2 Emin9Q28TreeS8B" }
+          - { id: "19", label: "q28+q12", mods: "Emin9Q28TreeS6B Emin9Q12TreeS1" }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/lean-setup
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v6
         with:
           path: .lake/build
           key: prefix-${{ github.sha }}
@@ -83,26 +87,26 @@ jobs:
             cp .lake/build/ir/ContactNumbers/$m.*      out/ir/
           done
           du -sh out
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: chunk-${{ matrix.id }}
           path: out
           retention-days: 1
 
   finish:
-    name: finish and check the trust base
+    name: "assemble + check axioms"
     needs: chunks
     runs-on: ubuntu-latest
     timeout-minutes: 340
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/lean-setup
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v6
         with:
           path: .lake/build
           key: prefix-${{ github.sha }}
           fail-on-cache-miss: true
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: chunk-*
           merge-multiple: true
@@ -125,7 +129,7 @@ jobs:
           n=$(grep -c 'depends on axioms' axioms.txt)
           echo "checked $n theorems"
           test "$n" -ge 8
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: axioms
