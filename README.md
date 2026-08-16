@@ -84,12 +84,17 @@ lake exe cache get     # prebuilt mathlib oleans
 lake build
 ```
 
-On four cores of an AMD Ryzen 7 5700G a full build takes about five hours, dominated by
-the serialized search trees and the Positivstellensatz witnesses; `Emin9Q10.lean` alone
-takes roughly ninety minutes. This is longer than the six-hour ceiling on a single
-GitHub-hosted job once that machine's slower cores are accounted for, so CI builds in
-three chained stages that pass `.lake/build` along through the cache, with the trust-base
-check at the end of the last one.
+A full build is about 30 CPU-hours: roughly five hours on four cores of an AMD Ryzen 7
+5700G, dominated by the certificate chunks and the Positivstellensatz witnesses. That is
+more than the six-hour ceiling on any single GitHub-hosted job, so CI exploits the shape
+of the module graph instead: 41 of the 95 modules are kernel-checked certificate chunks
+that depend only on a shared prefix, so they build concurrently.
+
+    prefix  ->  20 parallel chunk jobs  ->  finish, then the trust-base check
+
+The prefix is handed on in the cache and the chunk results as artifacts. A complete run
+takes about 2.8 hours of wall-clock time and ends by running `Axioms.lean` and failing if
+any theorem reports anything other than the three standard axioms.
 
 ## Checking what is assumed
 
