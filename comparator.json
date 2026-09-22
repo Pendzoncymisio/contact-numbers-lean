@@ -1,0 +1,15 @@
+{
+    "challenge_module": "Challenge",
+    "solution_module": "Solution",
+    "theorem_names": [
+        "ContactNumbers.contactNumber_six",
+        "ContactNumbers.contactNumber_seven",
+        "ContactNumbers.contactNumber_eight",
+        "ContactNumbers.contactNumber_nine",
+        "ContactNumbers.conjecture52_six",
+        "ContactNumbers.conjecture52_seven",
+        "ContactNumbers.conjecture52_eight",
+        "ContactNumbers.conjecture52_nine"
+    ],
+    "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"]
+}

@@ -1,0 +1,193 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "contact-numbers-lean"
+  description: >-
+    The contact number c(n,3) of a packing of n congruent balls in Euclidean 3-space is
+    the maximum number of touching pairs. Exact values were known only for n <= 5. This
+    project proves c(6,3) = 12, c(7,3) = 15, c(8,3) = 18 and c(9,3) = 21, and that every
+    packing attaining these values is minimally rigid in the sense of Definition 1 of the
+    Bezdek-Khan survey. Since Conjecture 5.2 of that survey asserts a value only for
+    n = 6,...,9, its numerical half is thereby settled, and its structural half at every n
+    for which it makes a numerical claim. The structural half for n >= 10 is untouched.
+  authors: ["Marek Wrzos"]
+  responsible_maintainers: ["Marek Wrzos"]
+  license: "Apache-2.0"
+
+sources:
+  - title: "Exact contact numbers for packings of six to nine congruent balls"
+    authors: ["Marek Wrzos"]
+    type: "original-proof"
+    relationship: "independently-proves"
+    note: >-
+      The values and the minimal-rigidity statement are proved here; they are not
+      formalizations of an existing proof. An accompanying preprint is in the repository
+      under paper/ and describes the same argument informally.
+    license: "CC-BY-4.0"
+    author_endorsement: "n/a"
+  - title: "Contact numbers for sphere packings"
+    authors: ["Karoly Bezdek", "Muhammad A. Khan"]
+    id: "arXiv:1601.00145"
+    type: "article"
+    location: "Section 5, Proposition 5.1 and Conjecture 5.2"
+    relationship: "background"
+    note: >-
+      States that c(n,3) is unknown for n >= 6, and obtains c(n,3) = 3n-6 for n = 4,...,9
+      only conditionally on the completeness of the enumeration of Arkus, Manoharan and
+      Brenner. That hypothesis is what this project removes; nothing from this source is
+      assumed in the proofs.
+    author_endorsement: "not-contacted"
+  - title: "Deriving finite sphere packings"
+    authors: ["Natalie Arkus", "Vinothan N. Manoharan", "Michael P. Brenner"]
+    id: "arXiv:1011.5412"
+    type: "article"
+    relationship: "background"
+    note: >-
+      The numerical enumeration whose completeness Proposition 5.1 assumes. Used only for
+      comparison; no result of it is assumed.
+    author_endorsement: "not-contacted"
+
+related_formalizations:
+  - title: "Progress in formalizing sphere packing in dimension 8"
+    id: "arXiv:2604.23468"
+    note: >-
+      Lean formalization of Viazovska's dimension 8 result. Same prover and adjacent
+      subject, but concerns packing density rather than contact numbers. Independent of
+      this project; no code is shared.
+
+classification:
+  arxiv: ["math.MG", "cs.LO"]
+  msc2020: ["52C17", "52C25", "52C10", "68V20"]
+
+status:
+  scope: >-
+    Complete and self-contained for the stated results. Depends on Mathlib only. Not
+    proved: uniqueness of the maximisers; minimal rigidity for general n >= 10; rigidity
+    in the kinematic sense; anything for n >= 10.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+  main_results:
+    - declaration: "ContactNumbers.contactNumber_six"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "ContactNumbers.contactNumber_seven"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "ContactNumbers.contactNumber_eight"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "ContactNumbers.contactNumber_nine"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "ContactNumbers.conjecture52_nine"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["claude-opus-5"]
+      framework: "Claude Code"
+      tool_setup: >-
+        An AI agent working in a terminal with shell and file access, running Lean and
+        Python directly, under the author's direction across a series of interactive
+        sessions. The agent wrote the Lean proofs, the Python certificate generators, the
+        preprint and the CI configuration. Certificate data (search trees,
+        Positivstellensatz witnesses, interval subdivisions) was produced by the Python
+        generators archived in scripts/ and is checked by the Lean kernel; those
+        generators are not part of the trust base.
+      cost:
+        wall_time: "about seven weeks of intermittent sessions"
+        spend_usd: "subscription-based usage"
+        hardware: "one 8-core desktop; no GPU"
+      prompting_notes: >-
+        Direction was mathematical rather than tactic-level: goals were set in terms of
+        which case to close next, and the agent chose the methods. The author reviewed
+        statements, scope and claims rather than proof scripts.
+  spend_usd: "subscription-based usage"
+  notes: >-
+    Essentially all of the development is AI-authored. The author set the objectives,
+    reviewed the statements and the claims made about them, and is responsible for the
+    work. The reason to take the result seriously is not the process but the kernel
+    check: every theorem depends on exactly propext, Classical.choice and Quot.sound,
+    with no sorry, no added axiom and no native_decide, and continuous integration
+    rebuilds the whole development from a clean checkout and fails if that ceases to
+    hold.
+
+fidelity:
+  divergences: >-
+    The development grew out of a study of hard-sphere energy minimisation, and internal
+    names still carry that origin: the namespace is Kissing3D, the per-case modules are
+    Emin7, Emin8, Emin9 for "energy minimum", and the underlying quantity is
+    energy X = -(contactCount X)/2 with contactCount counting ordered touching pairs, so
+    that energy X = -(contacts X). Solution.lean restates everything in contact-number
+    language; no statement depends on the older names. Balls have radius 1/2 here, so
+    touching means centres at distance exactly 1; the Bezdek-Khan survey uses unit balls
+    and distance 2, which differs by a scaling.
+
+review:
+  status: "agent-reviewed"
+  reviewers: []
+  notes: >-
+    No peer review. An adversarial review by a separate AI agent raised six findings,
+    all acted on: an under-quoted footnote in the Bezdek-Khan survey, a missing citation
+    to the dimension 8 Lean formalization, stale module and kernel-site counts, a
+    mismatch between the names shown in the preprint and those exported by the artifact,
+    a trivially-satisfied clause in the minimal-rigidity statement, and a DOI pointing at
+    an unverified snapshot. One substantive error was found and fixed earlier in the
+    preprint's description of a shell-obstruction lemma, where the stated hypotheses did
+    not match the formal statement. arXiv endorsement for math.MG was sought and not
+    obtained; the work has not appeared elsewhere.
+
+alignment:
+  namespace: "ContactNumbers"
+  statements:
+    - source: "c(6,3) = 12"
+      lean: "ContactNumbers.contactNumber_six"
+      module: "Solution"
+      status: "proved"
+    - source: "c(7,3) = 15"
+      lean: "ContactNumbers.contactNumber_seven"
+      module: "Solution"
+      status: "proved"
+    - source: "c(8,3) = 18"
+      lean: "ContactNumbers.contactNumber_eight"
+      module: "Solution"
+      status: "proved"
+    - source: "c(9,3) = 21"
+      lean: "ContactNumbers.contactNumber_nine"
+      module: "Solution"
+      status: "proved"
+    - source: "Bezdek-Khan Conjecture 5.2 at n = 6,7,8,9: the value, and minimal rigidity of every packing attaining it"
+      lean: "ContactNumbers.conjecture52_six .. conjecture52_nine"
+      module: "Solution"
+      status: "proved"
+      note: >-
+        Of the two clauses of minimal rigidity, the second (at least 3n-6 contacts) is
+        immediate once the packing is assumed to attain c(n,3) = 3n-6, and is present
+        only because Definition 1 includes it. The content is the first clause, that no
+        ball touches fewer than three others.
+    - source: "Structural half of Conjecture 5.2 for general n >= 10"
+      lean: ""
+      module: ""
+      status: "not-formalized"
+      note: >-
+        Out of reach of this method, and of any finite computation, since c(n,3) is
+        unknown for every n >= 10.
+
+acknowledgements: >-
+  Built on Mathlib. The interval branch-and-prune used for the n = 9 obstructions is a
+  specialisation of the approach of Solovyev and Hales for the Flyspeck inequalities,
+  simplified to exact rational arithmetic.

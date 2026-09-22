@@ -180,6 +180,15 @@ The certificate families named in the verification jobs and their artifacts (`q2
 `q12`, `q37`, `q1`, `q30`) are the certificate kinds tabulated in Appendix A of the
 paper, so a failing job names the obstruction involved.
 
+## Palomar
+
+`Challenge.lean` states the results using only Mathlib, with the proofs left as `sorry`;
+`Solution.lean` proves the same statements from this library. `comparator.json` lists the
+eight theorems for [Comparator](https://github.com/leanprover/comparator), and
+`formalization.yaml` records authorship, sources, automation and review. Together these
+are the submission to the [Palomar registry](https://palomar-registry.org/) of
+Lean-verified mathematics.
+
 ## Citing
 
 Archived at [doi:10.5281/zenodo.21935524](https://doi.org/10.5281/zenodo.21935524)

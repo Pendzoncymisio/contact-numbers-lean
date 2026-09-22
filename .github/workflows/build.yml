@@ -128,6 +128,9 @@ jobs:
           echo "oleans present: $(ls .lake/build/lib/lean/ContactNumbers/*.olean | wc -l) of 95"
       - name: Build the remainder
         run: lake build
+      - name: Build the Palomar challenge and solution
+        run: lake build Challenge Solution
+
       - name: Check the trust base
         run: |
           lake env lean Axioms.lean | tee axioms.txt
