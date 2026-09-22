@@ -53,6 +53,7 @@ sources:
 related_formalizations:
   - title: "Progress in formalizing sphere packing in dimension 8"
     id: "arXiv:2604.23468"
+    relationship: "independent"
     note: >-
       Lean formalization of Viazovska's dimension 8 result. Same prover and adjacent
       subject, but concerns packing density rather than contact numbers. Independent of
@@ -182,8 +183,6 @@ alignment:
         only because Definition 1 includes it. The content is the first clause, that no
         ball touches fewer than three others.
     - source: "Structural half of Conjecture 5.2 for general n >= 10"
-      lean: ""
-      module: ""
       status: "not-formalized"
       note: >-
         Out of reach of this method, and of any finite computation, since c(n,3) is
