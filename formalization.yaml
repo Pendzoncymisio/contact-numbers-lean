@@ -19,11 +19,13 @@ sources:
   - title: "Exact contact numbers for packings of six to nine congruent balls"
     authors: ["Marek Wrzos"]
     type: "original-proof"
-    relationship: "independently-proves"
+    relationship: "other"
     note: >-
-      The values and the minimal-rigidity statement are proved here; they are not
-      formalizations of an existing proof. An accompanying preprint is in the repository
-      under paper/ and describes the same argument informally.
+      This entry is the project's own result, not an external source: the four values and
+      the minimal-rigidity statement are proved here for the first time, so there is no
+      prior proof to formalize, adapt or independently reprove. The relationship is
+      recorded as "other" for that reason. An accompanying preprint under paper/ presents
+      the same argument informally.
     license: "CC-BY-4.0"
     author_endorsement: "n/a"
   - title: "Contact numbers for sphere packings"
