@@ -277,14 +277,14 @@ lemma lowBound_le (Q : Poly) (w : List ℚ) (t : List ℝ)
     have htail := ih (fun q hq => hes q (List.mem_cons_of_mem _ hq))
     simp only [lowBound, List.foldr_cons, evalPoly_cons]
     by_cases hz : es.all (fun e => e == 0) = true
-    · rw [if_pos hz]
+    · rw [ite_eq_left hz]
       rw [evalMono_all_zero t es hz]
       push_cast
       simp only [lowBound] at htail
       linarith
-    · rw [if_neg hz]
+    · rw [ite_eq_right hz]
       by_cases hc : c < 0
-      · rw [if_pos hc]
+      · rw [ite_eq_left hc]
         have hb := evalMono_le h0 hw hlen es (hes (c, es) (by simp))
         have hcr : (c : ℝ) < 0 := by exact_mod_cast hc
         have h6 : (c : ℝ) * ((evalMonoQ w es : ℚ) : ℝ) ≤ (c : ℝ) * evalMono t es := by
@@ -293,7 +293,7 @@ lemma lowBound_le (Q : Poly) (w : List ℚ) (t : List ℝ)
         simp only [lowBound] at htail
 
         linarith
-      · rw [if_neg hc]
+      · rw [ite_eq_right hc]
         push Not at hc
         have hcr : (0:ℝ) ≤ (c : ℝ) := by exact_mod_cast hc
         have hm := evalMono_nonneg h0 es
@@ -332,13 +332,13 @@ lemma evalPoly_insertTerm (t : ℚ × List ℕ) (P : Poly) (s : List ℝ) :
     obtain ⟨c', es'⟩ := u
     simp only [insertTerm]
     by_cases h : es == es'
-    · rw [if_pos h]
+    · rw [ite_eq_left h]
       have heq : es = es' := by simpa using h
       subst heq
       simp only [evalPoly_cons]
       push_cast
       ring
-    · rw [if_neg h]
+    · rw [ite_eq_right h]
       simp only [evalPoly_cons, ih]
 
       ring
@@ -365,13 +365,13 @@ lemma insertTerm_length (t : ℚ × List ℕ) (P : Poly) :
     intro q hq
     simp only [insertTerm] at hq
     by_cases h : t.2 == u.2
-    · rw [if_pos h] at hq
+    · rw [ite_eq_left h] at hq
       rcases List.mem_cons.mp hq with rfl | hq'
       · right
         exact ⟨u, by simp, rfl⟩
       · right
         exact ⟨q, List.mem_cons_of_mem _ hq', rfl⟩
-    · rw [if_neg h] at hq
+    · rw [ite_eq_right h] at hq
       rcases List.mem_cons.mp hq with rfl | hq'
       · right; exact ⟨q, by simp, rfl⟩
       · rcases ih q hq' with h1 | ⟨p, hp, he⟩
@@ -766,7 +766,7 @@ theorem ibpWalk_impossible (dets minors : List Poly) (s : List ℝ)
         by_cases hcond : 0 < lowBound (combinePoly (shiftPoly (dets.getD idx []) lo)) w
         · exact hleaf (dets.getD idx []) (le_of_eq (hgetPoly dets idx hdets))
             (hdetAr idx) hcond
-        · rw [if_neg hcond] at hwalk
+        · rw [ite_eq_right hcond] at hwalk
           simp at hwalk
       · by_cases hk1 : kind = 1
         · subst hk1

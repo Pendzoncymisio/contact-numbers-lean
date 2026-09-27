@@ -76,9 +76,9 @@ pairwise distances at least one: no genericity, boundedness, or rigidity is assu
 ## Building
 
 Requires [`elan`](https://github.com/leanprover/elan); the toolchain
-(`leanprover/lean4:v4.32.0`) is pinned in `lean-toolchain` and the dependency
+(`leanprover/lean4:v4.35.0-rc2`) is pinned in `lean-toolchain` and the dependency
 revisions in `lake-manifest.json`. The only dependency is `mathlib`
-(rev `81a5d257c8e410db227a6665ed08f64fea08e997`).
+(tag `v4.35.0-rc2`, rev `065356127b1dc0016f66b7283ce0ce2c4055aa55`).
 
 ```sh
 lake exe cache get     # prebuilt mathlib oleans
@@ -154,7 +154,7 @@ The core files keep their original names rather than being renamed, so that they
 close to the development they were extracted from. The only edits applied during
 extraction are mechanical: deprecated tactics and lemmas updated for the pinned mathlib
 (`push_neg` to `push Not`, `Fin.coe_cast` to `Fin.val_cast`, `mul_le_mul_right'` to
-`mul_le_mul_left`), unused `simp` arguments dropped, unused binders underscored, and one
+`mul_le_mul_left`, `if_pos`/`if_neg` to `ite_eq_left`/`ite_eq_right`), unused `simp` arguments dropped, unused binders underscored, and one
 local variable renamed off a deprecated global. None of these touches a statement, and
 the build is warning-free.
 

@@ -35,11 +35,11 @@ lemma contactCount_erase {X : Finset E3} {v : E3} (hv : v ∈ X) :
       rw [neighbors, neighbors, Finset.filter_erase]
     by_cases hd : dist z v = 1
     · have hvmem : v ∈ neighbors X z := Finset.mem_filter.mpr ⟨hv, hd⟩
-      rw [if_pos hd, h1, Finset.card_erase_of_mem hvmem]
+      rw [ite_eq_left hd, h1, Finset.card_erase_of_mem hvmem]
       have hpos : 0 < (neighbors X z).card := Finset.card_pos.mpr ⟨v, hvmem⟩
       omega
     · have hvnot : v ∉ neighbors X z := fun hmem => hd (Finset.mem_filter.mp hmem).2
-      rw [if_neg hd, add_zero, h1, Finset.erase_eq_of_notMem hvnot]
+      rw [ite_eq_right hd, add_zero, h1, Finset.erase_eq_of_notMem hvnot]
   have hsum : contactCount X
       = (neighbors X v).card + ∑ z ∈ X.erase v, (neighbors X z).card :=
     (Finset.add_sum_erase X (fun z => (neighbors X z).card) hv).symm
@@ -232,9 +232,9 @@ lemma walk_append {fuel : ℕ} {l1 l2 r : List ℕ} {k : ℕ} {es ns : List ℕ}
             else if checkCert es ns ((c - 1) / 2) then some (rest ++ l2)
             else none) from rfl]
       by_cases hc : c == 0
-      · rw [if_pos hc] at h ⊢
+      · rw [ite_eq_left hc] at h ⊢
         by_cases hk : k < 28
-        · rw [if_pos hk] at h ⊢
+        · rw [ite_eq_left hk] at h ⊢
           cases hw : walk fuel rest (k + 1) (k :: es) ns with
           | none => rw [hw] at h; simp at h
           | some rest2 =>
@@ -243,14 +243,14 @@ lemma walk_append {fuel : ℕ} {l1 l2 r : List ℕ} {k : ℕ} {es ns : List ℕ}
             rw [ih hw]
             simp only
             exact ih h
-        · rw [if_neg hk] at h
+        · rw [ite_eq_right hk] at h
           exact absurd h (by simp)
-      · rw [if_neg hc] at h ⊢
+      · rw [ite_eq_right hc] at h ⊢
         by_cases hcc : checkCert es ns ((c - 1) / 2)
-        · rw [if_pos hcc] at h ⊢
+        · rw [ite_eq_left hcc] at h ⊢
           simp only [Option.some.injEq] at h
           rw [h]
-        · rw [if_neg hcc] at h
+        · rw [ite_eq_right hcc] at h
           exact absurd h (by simp)
 
 /-- Codec facts, kernel-checked: decoding inverts encoding on the 28 pair indices. -/
@@ -429,18 +429,18 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
       obtain ⟨hk28, hnd⟩ := hns k hkns
       obtain ⟨hfs, hs8⟩ := pair_decode_lt k hk28
       by_cases hfeq : pairFst k = v
-      · refine ⟨by simp only [ptn, if_pos hfeq]; omega,
-          by simp only [ptn, if_pos hfeq]; omega, ?_⟩
-        simp only [ptn, if_pos hfeq]
+      · refine ⟨by simp only [ptn, ite_eq_left hfeq]; omega,
+          by simp only [ptn, ite_eq_left hfeq]; omega, ?_⟩
+        simp only [ptn, ite_eq_left hfeq]
         rw [← hfeq]
         exact hnd
       · have hseq : pairSnd k = v := by
           rcases hkinc with hc | hc
           · exact absurd hc hfeq
           · exact hc
-        refine ⟨by simp only [ptn, if_neg hfeq]; omega,
-          by simp only [ptn, if_neg hfeq]; exact hfeq, ?_⟩
-        simp only [ptn, if_neg hfeq]
+        refine ⟨by simp only [ptn, ite_eq_right hfeq]; omega,
+          by simp only [ptn, ite_eq_right hfeq]; exact hfeq, ?_⟩
+        simp only [ptn, ite_eq_right hfeq]
         intro hd
         apply hnd
         rw [← hseq, dist_comm] at hd
@@ -457,11 +457,11 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
       apply pair_decode_inj k hk28 k' hk28'
       all_goals
         rcases hkinc with hc | hc <;> rcases hkinc' with hc' | hc' <;>
-        [ (rw [if_pos hc, if_pos hc'] at hpp);
-          (rw [if_pos hc, if_neg (by omega : ¬ pairFst k' = v)] at hpp);
-          (rw [if_neg (by omega : ¬ pairFst k = v), if_pos hc'] at hpp);
-          (rw [if_neg (by omega : ¬ pairFst k = v),
-               if_neg (by omega : ¬ pairFst k' = v)] at hpp) ] <;>
+        [ (rw [ite_eq_left hc, ite_eq_left hc'] at hpp);
+          (rw [ite_eq_left hc, ite_eq_right (by omega : ¬ pairFst k' = v)] at hpp);
+          (rw [ite_eq_right (by omega : ¬ pairFst k = v), ite_eq_left hc'] at hpp);
+          (rw [ite_eq_right (by omega : ¬ pairFst k = v),
+               ite_eq_right (by omega : ¬ pairFst k' = v)] at hpp) ] <;>
         omega
     -- the four partner particles exclude four slots of the seven
     have hlen4 : 4 ≤ l.length := hlen
@@ -768,18 +768,18 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
       obtain ⟨hk28, hd⟩ := hes k hkes
       obtain ⟨hfs, hs8⟩ := pair_decode_lt k hk28
       by_cases hfeq : pairFst k = i+1
-      · refine ⟨by simp only [ptn, if_pos hfeq]; omega,
-          by simp only [ptn, if_pos hfeq]; omega, ?_⟩
-        simp only [ptn, if_pos hfeq]
+      · refine ⟨by simp only [ptn, ite_eq_left hfeq]; omega,
+          by simp only [ptn, ite_eq_left hfeq]; omega, ?_⟩
+        simp only [ptn, ite_eq_left hfeq]
         rw [← hfeq]
         exact hd
       · have hseq : pairSnd k = i+1 := by
           rcases hkinc with hc | hc
           · exact absurd hc hfeq
           · exact hc
-        refine ⟨by simp only [ptn, if_neg hfeq]; omega,
-          by simp only [ptn, if_neg hfeq]; exact hfeq, ?_⟩
-        simp only [ptn, if_neg hfeq]
+        refine ⟨by simp only [ptn, ite_eq_right hfeq]; omega,
+          by simp only [ptn, ite_eq_right hfeq]; exact hfeq, ?_⟩
+        simp only [ptn, ite_eq_right hfeq]
         rw [← hseq, dist_comm]
         exact hd
     have hpinj2' : ∀ k ∈ le', ∀ k' ∈ le', ptn (i+1) k = ptn (i+1) k' → k = k' := by
@@ -794,11 +794,11 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
       apply pair_decode_inj k hk28 k' hk28'
       all_goals
         rcases hkinc with hc | hc <;> rcases hkinc' with hc' | hc' <;>
-        [ (rw [if_pos hc, if_pos hc'] at hpp);
-          (rw [if_pos hc, if_neg (by omega : ¬ pairFst k' = i+1)] at hpp);
-          (rw [if_neg (by omega : ¬ pairFst k = i+1), if_pos hc'] at hpp);
-          (rw [if_neg (by omega : ¬ pairFst k = i+1),
-               if_neg (by omega : ¬ pairFst k' = i+1)] at hpp) ] <;>
+        [ (rw [ite_eq_left hc, ite_eq_left hc'] at hpp);
+          (rw [ite_eq_left hc, ite_eq_right (by omega : ¬ pairFst k' = i+1)] at hpp);
+          (rw [ite_eq_right (by omega : ¬ pairFst k = i+1), ite_eq_left hc'] at hpp);
+          (rw [ite_eq_right (by omega : ¬ pairFst k = i+1),
+               ite_eq_right (by omega : ¬ pairFst k' = i+1)] at hpp) ] <;>
         omega
     have hTcard' : le'.toFinset.card = le'.length := List.toFinset_card_of_nodup hlnd'
     have hlow : le'.length ≤ (neighbors X (qf p (i+1))).card := by
@@ -840,18 +840,18 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
       obtain ⟨hk28, hnd⟩ := hns k hkns
       obtain ⟨hfs, hs8⟩ := pair_decode_lt k hk28
       by_cases hfeq : pairFst k = i
-      · refine ⟨by simp only [ptn, if_pos hfeq]; omega,
-          by simp only [ptn, if_pos hfeq]; omega, ?_⟩
-        simp only [ptn, if_pos hfeq]
+      · refine ⟨by simp only [ptn, ite_eq_left hfeq]; omega,
+          by simp only [ptn, ite_eq_left hfeq]; omega, ?_⟩
+        simp only [ptn, ite_eq_left hfeq]
         rw [← hfeq]
         exact hnd
       · have hseq : pairSnd k = i := by
           rcases hkinc with hc | hc
           · exact absurd hc hfeq
           · exact hc
-        refine ⟨by simp only [ptn, if_neg hfeq]; omega,
-          by simp only [ptn, if_neg hfeq]; exact hfeq, ?_⟩
-        simp only [ptn, if_neg hfeq]
+        refine ⟨by simp only [ptn, ite_eq_right hfeq]; omega,
+          by simp only [ptn, ite_eq_right hfeq]; exact hfeq, ?_⟩
+        simp only [ptn, ite_eq_right hfeq]
         intro hd
         apply hnd
         rw [← hseq, dist_comm] at hd
@@ -868,11 +868,11 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
       apply pair_decode_inj k hk28 k' hk28'
       all_goals
         rcases hkinc with hc | hc <;> rcases hkinc' with hc' | hc' <;>
-        [ (rw [if_pos hc, if_pos hc'] at hpp);
-          (rw [if_pos hc, if_neg (by omega : ¬ pairFst k' = i)] at hpp);
-          (rw [if_neg (by omega : ¬ pairFst k = i), if_pos hc'] at hpp);
-          (rw [if_neg (by omega : ¬ pairFst k = i),
-               if_neg (by omega : ¬ pairFst k' = i)] at hpp) ] <;>
+        [ (rw [ite_eq_left hc, ite_eq_left hc'] at hpp);
+          (rw [ite_eq_left hc, ite_eq_right (by omega : ¬ pairFst k' = i)] at hpp);
+          (rw [ite_eq_right (by omega : ¬ pairFst k = i), ite_eq_left hc'] at hpp);
+          (rw [ite_eq_right (by omega : ¬ pairFst k = i),
+               ite_eq_right (by omega : ¬ pairFst k' = i)] at hpp) ] <;>
         omega
     have hup : (neighbors X (qf p i)).card + ln.length ≤ 7 := by
       set PS : Finset E3 := ln.toFinset.image (fun k => qf p (ptn i k)) with hPS
@@ -971,9 +971,9 @@ theorem walk_impossible {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
             else if checkCert es ns ((c - 1) / 2) then some rest'
             else none) from rfl] at hwalk
       by_cases hc : c == 0
-      · rw [if_pos hc] at hwalk
+      · rw [ite_eq_left hc] at hwalk
         by_cases hklt : k < 28
-        · rw [if_pos hklt] at hwalk
+        · rw [ite_eq_left hklt] at hwalk
           by_cases hbond : dist (qf p (pairFst k)) (qf p (pairSnd k)) = 1
           · cases hw : walk fuel rest' (k + 1) (k :: es) ns with
             | none => rw [hw] at hwalk; simp at hwalk
@@ -1009,12 +1009,12 @@ theorem walk_impossible {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
                 rcases List.mem_cons.mp hi with rfl | hi
                 · omega
                 · exact Nat.lt_succ_of_lt (hnslt i hi)
-        · rw [if_neg hklt] at hwalk
+        · rw [ite_eq_right hklt] at hwalk
           simp at hwalk
-      · rw [if_neg hc] at hwalk
+      · rw [ite_eq_right hc] at hwalk
         by_cases hcert : checkCert es ns ((c - 1) / 2) = true
         · exact checkCert_sound hX hpmem hpinj h8 hXim hcc hsort hes hns hesnd hnsnd hcert
-        · rw [if_neg hcert] at hwalk
+        · rw [ite_eq_right hcert] at hwalk
           simp at hwalk
 
 open scoped Classical in
@@ -1113,9 +1113,9 @@ lemma walk_fuel_mono {f f' : ℕ} (hf : f ≤ f') :
                 else none
               else if checkCert es ns ((c - 1) / 2) then some rest else none) from rfl]
         by_cases hc : c == 0
-        · rw [if_pos hc] at h ⊢
+        · rw [ite_eq_left hc] at h ⊢
           by_cases hk : k < 28
-          · rw [if_pos hk] at h ⊢
+          · rw [ite_eq_left hk] at h ⊢
             cases hw : walk f rest (k + 1) (k :: es) ns with
             | none => rw [hw] at h; simp at h
             | some rest2 =>
@@ -1123,9 +1123,9 @@ lemma walk_fuel_mono {f f' : ℕ} (hf : f ≤ f') :
               simp only at h
               rw [ih hff hw]
               simpa using ih hff h
-          · rw [if_neg hk] at h
+          · rw [ite_eq_right hk] at h
             exact absurd h (by simp)
-        · rw [if_neg hc] at h ⊢
+        · rw [ite_eq_right hc] at h ⊢
           exact h
 
 /-- Symbolic branch composition for chunked kernel checks. -/
@@ -1145,7 +1145,7 @@ lemma walk_branch {fuel : ℕ} {dL dR : List ℕ} {k : ℕ} {es ns : List ℕ}
           else none
         else if checkCert es ns (((0 : ℕ) - 1) / 2) then some (dL ++ dR)
         else none) from rfl]
-  rw [if_pos (by norm_num), if_pos hk, hcomp]
+  rw [ite_eq_left (by norm_num), ite_eq_left hk, hcomp]
   simpa using hR
 
 end Emin8T
