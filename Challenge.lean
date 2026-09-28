@@ -18,7 +18,12 @@ conditionally on the completeness of a numerical enumeration.
 The statements below are that conjecture, unconditionally: the four values, and minimal
 rigidity of every packing attaining them.
 -/
-import Mathlib
+
+module
+
+public import Mathlib
+
+@[expose] public section
 
 namespace ContactNumbers
 

@@ -3,7 +3,12 @@
   for the frame `(p, e, p × e)`.  Extracted verbatim from the parent development
   (`Physics/CapCount.lean`), which is not otherwise needed here.
 -/
-import ContactNumbers.Basic
+
+module
+
+public import ContactNumbers.Basic
+
+@[expose] public section
 
 namespace Kissing3D
 

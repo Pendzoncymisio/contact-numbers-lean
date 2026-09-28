@@ -1,11 +1,15 @@
-import ContactNumbers.Emin9Q12TreeS0
-import ContactNumbers.Emin9Q12TreeS1
-import ContactNumbers.Emin9Q12TreeS2
-import ContactNumbers.Emin9Q12TreeS3
-import ContactNumbers.Emin9Q12TreeS4
-import ContactNumbers.Emin9Q12TreeS5
-import ContactNumbers.Emin9Q12TreeS6
-import ContactNumbers.Emin9Q12TreeS7
+module
+
+public import ContactNumbers.Emin9Q12TreeS0
+public import ContactNumbers.Emin9Q12TreeS1
+public import ContactNumbers.Emin9Q12TreeS2
+public import ContactNumbers.Emin9Q12TreeS3
+public import ContactNumbers.Emin9Q12TreeS4
+public import ContactNumbers.Emin9Q12TreeS5
+public import ContactNumbers.Emin9Q12TreeS6
+public import ContactNumbers.Emin9Q12TreeS7
+
+@[expose] public section
 
 set_option linter.style.header false
 set_option maxHeartbeats 200000000

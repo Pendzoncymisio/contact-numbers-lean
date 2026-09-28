@@ -1,26 +1,30 @@
-import ContactNumbers.Emin9Q28TreeS0A
-import ContactNumbers.Emin9Q28TreeS0B
-import ContactNumbers.Emin9Q28TreeS1A
-import ContactNumbers.Emin9Q28TreeS1B
-import ContactNumbers.Emin9Q28TreeS2A
-import ContactNumbers.Emin9Q28TreeS2B
-import ContactNumbers.Emin9Q28TreeS2C
-import ContactNumbers.Emin9Q28TreeS3A
-import ContactNumbers.Emin9Q28TreeS3B
-import ContactNumbers.Emin9Q28TreeS3C
-import ContactNumbers.Emin9Q28TreeS4A
-import ContactNumbers.Emin9Q28TreeS4B
-import ContactNumbers.Emin9Q28TreeS4C
-import ContactNumbers.Emin9Q28TreeS5A
-import ContactNumbers.Emin9Q28TreeS5B
-import ContactNumbers.Emin9Q28TreeS5C
-import ContactNumbers.Emin9Q28TreeS6A
-import ContactNumbers.Emin9Q28TreeS6B
-import ContactNumbers.Emin9Q28TreeS7A
-import ContactNumbers.Emin9Q28TreeS7B
-import ContactNumbers.Emin9Q28TreeS8A
-import ContactNumbers.Emin9Q28TreeS8B
-import ContactNumbers.Emin9Q28TreeS8C
+module
+
+public import ContactNumbers.Emin9Q28TreeS0A
+public import ContactNumbers.Emin9Q28TreeS0B
+public import ContactNumbers.Emin9Q28TreeS1A
+public import ContactNumbers.Emin9Q28TreeS1B
+public import ContactNumbers.Emin9Q28TreeS2A
+public import ContactNumbers.Emin9Q28TreeS2B
+public import ContactNumbers.Emin9Q28TreeS2C
+public import ContactNumbers.Emin9Q28TreeS3A
+public import ContactNumbers.Emin9Q28TreeS3B
+public import ContactNumbers.Emin9Q28TreeS3C
+public import ContactNumbers.Emin9Q28TreeS4A
+public import ContactNumbers.Emin9Q28TreeS4B
+public import ContactNumbers.Emin9Q28TreeS4C
+public import ContactNumbers.Emin9Q28TreeS5A
+public import ContactNumbers.Emin9Q28TreeS5B
+public import ContactNumbers.Emin9Q28TreeS5C
+public import ContactNumbers.Emin9Q28TreeS6A
+public import ContactNumbers.Emin9Q28TreeS6B
+public import ContactNumbers.Emin9Q28TreeS7A
+public import ContactNumbers.Emin9Q28TreeS7B
+public import ContactNumbers.Emin9Q28TreeS8A
+public import ContactNumbers.Emin9Q28TreeS8B
+public import ContactNumbers.Emin9Q28TreeS8C
+
+@[expose] public section
 
 set_option linter.style.header false
 set_option maxHeartbeats 200000000

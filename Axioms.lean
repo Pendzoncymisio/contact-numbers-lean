@@ -11,6 +11,9 @@
   axiom, and no `native_decide` (which would delegate evaluation to compiled code and
   appear here as `Lean.ofReduceBool`).
 -/
+
+module
+
 import ContactNumbers
 
 open ContactNumbers

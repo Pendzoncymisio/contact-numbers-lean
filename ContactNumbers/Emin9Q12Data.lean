@@ -1,4 +1,8 @@
-import ContactNumbers.IntervalBP
+module
+
+public import ContactNumbers.IntervalBP
+
+@[expose] public section
 
 set_option linter.style.header false
 set_option maxHeartbeats 200000000

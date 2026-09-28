@@ -1,5 +1,9 @@
-import ContactNumbers.Emin7Cert
-import ContactNumbers.GroundStates3
+module
+
+public import ContactNumbers.Emin7Cert
+public import ContactNumbers.GroundStates3
+
+@[expose] public section
 
 set_option linter.style.header false
 set_option maxHeartbeats 4000000

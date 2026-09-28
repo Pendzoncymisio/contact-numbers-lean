@@ -1,11 +1,15 @@
-import ContactNumbers.Emin9
-import ContactNumbers.Cap9
-import ContactNumbers.Emin9TreeC0
-import ContactNumbers.Emin9TreeC1
-import ContactNumbers.Emin9TreeC2
-import ContactNumbers.Emin9TreeC3
-import ContactNumbers.Emin9TreeC4
-import ContactNumbers.Emin9TreeC5
+module
+
+public import ContactNumbers.Emin9
+public import ContactNumbers.Cap9
+public import ContactNumbers.Emin9TreeC0
+public import ContactNumbers.Emin9TreeC1
+public import ContactNumbers.Emin9TreeC2
+public import ContactNumbers.Emin9TreeC3
+public import ContactNumbers.Emin9TreeC4
+public import ContactNumbers.Emin9TreeC5
+
+@[expose] public section
 
 set_option linter.style.header false
 set_option maxRecDepth 1000000

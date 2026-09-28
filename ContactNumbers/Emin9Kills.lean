@@ -1,4 +1,8 @@
-import ContactNumbers.Emin8Kills
+module
+
+public import ContactNumbers.Emin8Kills
+
+@[expose] public section
 
 set_option linter.style.header false
 set_option maxHeartbeats 1600000

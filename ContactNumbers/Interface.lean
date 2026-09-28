@@ -1,4 +1,8 @@
-import ContactNumbers.MinDegree
+module
+
+public import ContactNumbers.MinDegree
+
+@[expose] public section
 
 set_option linter.style.header false
 

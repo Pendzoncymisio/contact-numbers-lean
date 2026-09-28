@@ -1,5 +1,9 @@
-import ContactNumbers.Emin9Q28Tree
-import ContactNumbers.Emin9Kills
+module
+
+public import ContactNumbers.Emin9Q28Tree
+public import ContactNumbers.Emin9Kills
+
+@[expose] public section
 
 set_option linter.style.header false
 set_option maxHeartbeats 4000000

@@ -1,4 +1,8 @@
-import ContactNumbers.Cap8
+module
+
+public import ContactNumbers.Cap8
+
+@[expose] public section
 
 set_option linter.style.header false
 set_option maxHeartbeats 1000000

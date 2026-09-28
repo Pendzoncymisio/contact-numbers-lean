@@ -1,4 +1,8 @@
-import ContactNumbers.Emin8
+module
+
+public import ContactNumbers.Emin8
+
+@[expose] public section
 
 set_option linter.style.header false
 set_option maxRecDepth 100000

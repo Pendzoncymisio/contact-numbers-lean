@@ -2,7 +2,12 @@
 Copyright (c) 2026 Marek Wrzos. All rights reserved.
 Released under Apache 2.0 licence.
 -/
-import Mathlib
+
+module
+
+public import Mathlib
+
+@[expose] public section
 
 /-!
 # Contact numbers of congruent sphere packings: basic definitions

@@ -1,4 +1,8 @@
-import ContactNumbers.Frame
+module
+
+public import ContactNumbers.Frame
+
+@[expose] public section
 
 set_option linter.style.header false
 set_option maxHeartbeats 1000000

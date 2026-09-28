@@ -1,6 +1,10 @@
-import ContactNumbers.Emin9Q1TreeS0
-import ContactNumbers.Emin9Q1TreeS1
-import ContactNumbers.Emin9Q1TreeS2
+module
+
+public import ContactNumbers.Emin9Q1TreeS0
+public import ContactNumbers.Emin9Q1TreeS1
+public import ContactNumbers.Emin9Q1TreeS2
+
+@[expose] public section
 
 set_option linter.style.header false
 set_option maxHeartbeats 200000000

@@ -1,18 +1,22 @@
-import ContactNumbers.Emin8Final
-import ContactNumbers.Emin9Kills
-import ContactNumbers.Emin9Canon
-import ContactNumbers.Emin9P7
-import ContactNumbers.Emin9P3
-import ContactNumbers.Emin9P0
-import ContactNumbers.Emin9C23
-import ContactNumbers.Emin9Q0
-import ContactNumbers.Emin9Q4
-import ContactNumbers.Emin9Q10
-import ContactNumbers.Emin9Q1
-import ContactNumbers.Emin9Q12
-import ContactNumbers.Emin9Q28
-import ContactNumbers.Emin9Q30
-import ContactNumbers.Emin9Q37
+module
+
+public import ContactNumbers.Emin8Final
+public import ContactNumbers.Emin9Kills
+public import ContactNumbers.Emin9Canon
+public import ContactNumbers.Emin9P7
+public import ContactNumbers.Emin9P3
+public import ContactNumbers.Emin9P0
+public import ContactNumbers.Emin9C23
+public import ContactNumbers.Emin9Q0
+public import ContactNumbers.Emin9Q4
+public import ContactNumbers.Emin9Q10
+public import ContactNumbers.Emin9Q1
+public import ContactNumbers.Emin9Q12
+public import ContactNumbers.Emin9Q28
+public import ContactNumbers.Emin9Q30
+public import ContactNumbers.Emin9Q37
+
+@[expose] public section
 
 set_option linter.style.header false
 set_option linter.unusedSimpArgs false

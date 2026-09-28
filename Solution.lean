@@ -8,7 +8,12 @@ The definitions below are repeated verbatim from the Challenge module so that th
 statements compared are literally the same. The mathematics lives in the
 `ContactNumbers` library that this file imports; everything here is plumbing.
 -/
-import ContactNumbers.MinDegree
+
+module
+
+public import ContactNumbers.MinDegree
+
+@[expose] public section
 
 namespace ContactNumbers
 

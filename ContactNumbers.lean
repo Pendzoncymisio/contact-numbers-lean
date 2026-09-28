@@ -1,37 +1,39 @@
-import ContactNumbers.Basic
-import ContactNumbers.Frame
-import ContactNumbers.Contact3
-import ContactNumbers.GroundStates3
-import ContactNumbers.Emin7Cert
-import ContactNumbers.Emin7
-import ContactNumbers.Bipyramid7
-import ContactNumbers.Cap8
-import ContactNumbers.Emin8Kills
-import ContactNumbers.Emin8
-import ContactNumbers.Emin8Final
-import ContactNumbers.Cap9
-import ContactNumbers.Emin9Kills
-import ContactNumbers.IntervalBP
-import ContactNumbers.Emin9Canon
-import ContactNumbers.Emin9C23
-import ContactNumbers.Emin9P0
-import ContactNumbers.Emin9P3
-import ContactNumbers.Emin9P7
-import ContactNumbers.Emin9Q0
-import ContactNumbers.Emin9Q1
-import ContactNumbers.Emin9Q1Tree
-import ContactNumbers.Emin9Q4
-import ContactNumbers.Emin9Q10
-import ContactNumbers.Emin9Q12
-import ContactNumbers.Emin9Q12Tree
-import ContactNumbers.Emin9Q28
-import ContactNumbers.Emin9Q28Data
-import ContactNumbers.Emin9Q28Tree
-import ContactNumbers.Emin9Q30
-import ContactNumbers.Emin9Q30Tree
-import ContactNumbers.Emin9Q37
-import ContactNumbers.Emin9Q37Tree
-import ContactNumbers.Emin9
-import ContactNumbers.Emin9Final
-import ContactNumbers.MinDegree
-import ContactNumbers.Interface
+module
+
+public import ContactNumbers.Basic
+public import ContactNumbers.Frame
+public import ContactNumbers.Contact3
+public import ContactNumbers.GroundStates3
+public import ContactNumbers.Emin7Cert
+public import ContactNumbers.Emin7
+public import ContactNumbers.Bipyramid7
+public import ContactNumbers.Cap8
+public import ContactNumbers.Emin8Kills
+public import ContactNumbers.Emin8
+public import ContactNumbers.Emin8Final
+public import ContactNumbers.Cap9
+public import ContactNumbers.Emin9Kills
+public import ContactNumbers.IntervalBP
+public import ContactNumbers.Emin9Canon
+public import ContactNumbers.Emin9C23
+public import ContactNumbers.Emin9P0
+public import ContactNumbers.Emin9P3
+public import ContactNumbers.Emin9P7
+public import ContactNumbers.Emin9Q0
+public import ContactNumbers.Emin9Q1
+public import ContactNumbers.Emin9Q1Tree
+public import ContactNumbers.Emin9Q4
+public import ContactNumbers.Emin9Q10
+public import ContactNumbers.Emin9Q12
+public import ContactNumbers.Emin9Q12Tree
+public import ContactNumbers.Emin9Q28
+public import ContactNumbers.Emin9Q28Data
+public import ContactNumbers.Emin9Q28Tree
+public import ContactNumbers.Emin9Q30
+public import ContactNumbers.Emin9Q30Tree
+public import ContactNumbers.Emin9Q37
+public import ContactNumbers.Emin9Q37Tree
+public import ContactNumbers.Emin9
+public import ContactNumbers.Emin9Final
+public import ContactNumbers.MinDegree
+public import ContactNumbers.Interface
