@@ -231,7 +231,7 @@ lemma pairIdx_comm (i j : Nat) : pairIdx i j = pairIdx j i := by
 lemma pairIdx_lt_of : ∀ i j : Fin 7, i < j → pairIdx i.1 j.1 < 21 := by decide
 
 /-- Interpret a raw certificate vertex as a particle. -/
-private def ppf (p : Fin 7 → E3) (n : Nat) : E3 := p ⟨n % 7, Nat.mod_lt _ (by norm_num)⟩
+def ppf (p : Fin 7 → E3) (n : Nat) : E3 := p ⟨n % 7, Nat.mod_lt _ (by norm_num)⟩
 
 /-- Five points of `ℝ³` pairwise at distance one are impossible. -/
 lemma five_points_impossible {q0 q1 q2 q3 q4 : E3}

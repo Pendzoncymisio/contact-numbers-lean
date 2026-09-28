@@ -355,10 +355,10 @@ lemma contactCount_eq_twice_unordered {n : ℕ} {X : Finset E3} {p : Fin n → E
   omega
 
 /-- The other endpoint of pair `k`, seen from vertex `v`. -/
-private def ptn (v k : ℕ) : ℕ := if pairFst k = v then pairSnd k else pairFst k
+def ptn8 (v k : ℕ) : ℕ := if pairFst k = v then pairSnd k else pairFst k
 
 /-- Interpret a raw certificate vertex as a particle. -/
-private def qf (p : Fin 8 → E3) (n : ℕ) : E3 := p ⟨n % 8, Nat.mod_lt _ (by norm_num)⟩
+def qf8 (p : Fin 8 → E3) (n : ℕ) : E3 := p ⟨n % 8, Nat.mod_lt _ (by norm_num)⟩
 
 open scoped Classical in
 /-- **Certificate soundness**: no verified kill certificate is compatible with a
@@ -369,19 +369,19 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
     (hcc : 38 ≤ contactCount X)
     (hsort : ∀ i j : Fin 8, i ≤ j → (neighbors X (p j)).card ≤ (neighbors X (p i)).card)
     {es ns : List ℕ}
-    (hes : ∀ i ∈ es, i < 28 ∧ dist (qf p (pairFst i)) (qf p (pairSnd i)) = 1)
-    (hns : ∀ i ∈ ns, i < 28 ∧ ¬ dist (qf p (pairFst i)) (qf p (pairSnd i)) = 1)
+    (hes : ∀ i ∈ es, i < 28 ∧ dist (qf8 p (pairFst i)) (qf8 p (pairSnd i)) = 1)
+    (hns : ∀ i ∈ ns, i < 28 ∧ ¬ dist (qf8 p (pairFst i)) (qf8 p (pairSnd i)) = 1)
     (hesnd : es.Nodup) (hnsnd : ns.Nodup)
     {cert : ℕ} (hkill : checkCert es ns cert = true) : False := by
   -- particle-level helpers
-  have hqmem : ∀ m : ℕ, qf p m ∈ X := fun m => hpmem _
-  have hqne : ∀ {i j : ℕ}, i < 8 → j < 8 → i ≠ j → qf p i ≠ qf p j := by
+  have hqmem : ∀ m : ℕ, qf8 p m ∈ X := fun m => hpmem _
+  have hqne : ∀ {i j : ℕ}, i < 8 → j < 8 → i ≠ j → qf8 p i ≠ qf8 p j := by
     intro i j hi hj hne heq
     apply hne
     have hv := hpinj heq
     simp only [Fin.mk.injEq] at hv
     rwa [Nat.mod_eq_of_lt hi, Nat.mod_eq_of_lt hj] at hv
-  have hqdist : ∀ {i j : ℕ}, eMem es i j = true → dist (qf p i) (qf p j) = 1 := by
+  have hqdist : ∀ {i j : ℕ}, eMem es i j = true → dist (qf8 p i) (qf8 p j) = 1 := by
     intro i j h
     simp only [eMem, Bool.and_eq_true, and_assoc, decide_eq_true_eq, bne_iff_ne,
       List.contains_iff_mem] at h
@@ -398,11 +398,11 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
     simp only [eMem, Bool.and_eq_true, and_assoc, decide_eq_true_eq, bne_iff_ne,
       List.contains_iff_mem] at h
     exact ⟨h.1, h.2.1, h.2.2.1⟩
-  have hmemN : ∀ {u t : ℕ}, eMem es u t = true → qf p t ∈ neighbors X (qf p u) := by
+  have hmemN : ∀ {u t : ℕ}, eMem es u t = true → qf8 p t ∈ neighbors X (qf8 p u) := by
     intro u t h
     exact Finset.mem_filter.mpr ⟨hqmem t, hqdist h⟩
   have hcomm2 : ∀ {u v t : ℕ}, eMem es u t = true → eMem es v t = true →
-      qf p t ∈ neighbors X (qf p u) ∩ neighbors X (qf p v) := by
+      qf8 p t ∈ neighbors X (qf8 p u) ∩ neighbors X (qf8 p v) := by
     intro u v t h1 h2
     exact Finset.mem_inter.mpr ⟨hmemN h1, hmemN h2⟩
   -- dispatch on the kind
@@ -426,30 +426,30 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
     have hlnd : l.Nodup := by
       rw [hldef]
       exact hnsnd.filter _
-    have hp1 : ∀ k ∈ l, ptn v k < 8 ∧ ptn v k ≠ v ∧
-        ¬ dist (qf p v) (qf p (ptn v k)) = 1 := by
+    have hp1 : ∀ k ∈ l, ptn8 v k < 8 ∧ ptn8 v k ≠ v ∧
+        ¬ dist (qf8 p v) (qf8 p (ptn8 v k)) = 1 := by
       intro k hkmem
       obtain ⟨hkns, hkinc⟩ := hlsub k hkmem
       obtain ⟨hk28, hnd⟩ := hns k hkns
       obtain ⟨hfs, hs8⟩ := pair_decode_lt k hk28
       by_cases hfeq : pairFst k = v
-      · refine ⟨by simp only [ptn, ite_eq_left hfeq]; omega,
-          by simp only [ptn, ite_eq_left hfeq]; omega, ?_⟩
-        simp only [ptn, ite_eq_left hfeq]
+      · refine ⟨by simp only [ptn8, ite_eq_left hfeq]; omega,
+          by simp only [ptn8, ite_eq_left hfeq]; omega, ?_⟩
+        simp only [ptn8, ite_eq_left hfeq]
         rw [← hfeq]
         exact hnd
       · have hseq : pairSnd k = v := by
           rcases hkinc with hc | hc
           · exact absurd hc hfeq
           · exact hc
-        refine ⟨by simp only [ptn, ite_eq_right hfeq]; omega,
-          by simp only [ptn, ite_eq_right hfeq]; exact hfeq, ?_⟩
-        simp only [ptn, ite_eq_right hfeq]
+        refine ⟨by simp only [ptn8, ite_eq_right hfeq]; omega,
+          by simp only [ptn8, ite_eq_right hfeq]; exact hfeq, ?_⟩
+        simp only [ptn8, ite_eq_right hfeq]
         intro hd
         apply hnd
         rw [← hseq, dist_comm] at hd
         exact hd
-    have hpinj2 : ∀ k ∈ l, ∀ k' ∈ l, ptn v k = ptn v k' → k = k' := by
+    have hpinj2 : ∀ k ∈ l, ∀ k' ∈ l, ptn8 v k = ptn8 v k' → k = k' := by
       intro k hkmem k' hkmem' hpp
       obtain ⟨hkns, hkinc⟩ := hlsub k hkmem
       obtain ⟨hkns', hkinc'⟩ := hlsub k' hkmem'
@@ -457,7 +457,7 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
       obtain ⟨hk28', _⟩ := hns k' hkns'
       obtain ⟨hlt, h8'⟩ := pair_decode_lt k hk28
       obtain ⟨hlt', h8''⟩ := pair_decode_lt k' hk28'
-      simp only [ptn] at hpp
+      simp only [ptn8] at hpp
       apply pair_decode_inj k hk28 k' hk28'
       all_goals
         rcases hkinc with hc | hc <;> rcases hkinc' with hc' | hc' <;>
@@ -470,7 +470,7 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
     -- the four partner particles exclude four slots of the seven
     have hlen4 : 4 ≤ l.length := hlen
     have hTsub : l.toFinset.card = l.length := List.toFinset_card_of_nodup hlnd
-    set PS : Finset E3 := l.toFinset.image (fun k => qf p (ptn v k)) with hPS
+    set PS : Finset E3 := l.toFinset.image (fun k => qf8 p (ptn8 v k)) with hPS
     have hPScard : 4 ≤ PS.card := by
       rw [hPS, Finset.card_image_of_injOn]
       · omega
@@ -478,10 +478,10 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
         rw [Finset.mem_coe, List.mem_toFinset] at hk hk'
         obtain ⟨hlt8, _, _⟩ := hp1 k hk
         obtain ⟨hlt8', _, _⟩ := hp1 k' hk'
-        by_cases hpe : ptn v k = ptn v k'
+        by_cases hpe : ptn8 v k = ptn8 v k'
         · exact hpinj2 k hk k' hk' hpe
         · exact absurd heq (hqne hlt8 hlt8' hpe).elim
-    have hPSdisj : ∀ w ∈ PS, w ∈ X.erase (qf p v) ∧ w ∉ neighbors X (qf p v) := by
+    have hPSdisj : ∀ w ∈ PS, w ∈ X.erase (qf8 p v) ∧ w ∉ neighbors X (qf8 p v) := by
       intro w hw
       rw [hPS] at hw
       obtain ⟨k, hk, rfl⟩ := Finset.mem_image.mp hw
@@ -490,8 +490,8 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
       refine ⟨Finset.mem_erase.mpr ⟨hqne hlt8 (by omega) hnev, hqmem _⟩, ?_⟩
       intro hmem
       exact hnd (Finset.mem_filter.mp hmem).2
-    have hnb : (neighbors X (qf p v)).card ≤ 3 := by
-      have hunion : neighbors X (qf p v) ∪ PS ⊆ X.erase (qf p v) := by
+    have hnb : (neighbors X (qf8 p v)).card ≤ 3 := by
+      have hunion : neighbors X (qf8 p v) ∪ PS ⊆ X.erase (qf8 p v) := by
         intro w hw
         rcases Finset.mem_union.mp hw with hw | hw
         · exact Finset.mem_erase.mpr ⟨fun h => by
@@ -499,16 +499,16 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
             rw [h, dist_self] at this
             norm_num at this, (Finset.mem_filter.mp hw).1⟩
         · exact (hPSdisj w hw).1
-      have hdisj : Disjoint (neighbors X (qf p v)) PS := by
+      have hdisj : Disjoint (neighbors X (qf8 p v)) PS := by
         rw [Finset.disjoint_right]
         intro w hw
         exact (hPSdisj w hw).2
-      have hcard7 : (X.erase (qf p v)).card = 7 := by
+      have hcard7 : (X.erase (qf8 p v)).card = 7 := by
         rw [Finset.card_erase_of_mem (hqmem v), h8]
       have := Finset.card_le_card hunion
       rw [Finset.card_union_of_disjoint hdisj] at this
       omega
-    have hd4 := degree_ge_four hX h8 (by omega) (qf p v) (hqmem v)
+    have hd4 := degree_ge_four hX h8 (by omega) (qf8 p v) (hqmem v)
     omega
   · -- kind 1: ten decided non-bonds
     simp only [checkCert, hk] at hkill
@@ -611,9 +611,9 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
     have hn45 := hqne hw48 hw58 h45'
     have hn46 := hqne hw48 hw68 h46'
     have hn56 := hqne hw58 hw68 h56'
-    have hsub : ({qf p (fld cert 2), qf p (fld cert 3), qf p (fld cert 4),
-        qf p (fld cert 5), qf p (fld cert 6), qf p (fld cert 7)} : Finset E3)
-        ⊆ neighbors X (qf p (fld cert 0)) ∩ neighbors X (qf p (fld cert 1)) := by
+    have hsub : ({qf8 p (fld cert 2), qf8 p (fld cert 3), qf8 p (fld cert 4),
+        qf8 p (fld cert 5), qf8 p (fld cert 6), qf8 p (fld cert 7)} : Finset E3)
+        ⊆ neighbors X (qf8 p (fld cert 0)) ∩ neighbors X (qf8 p (fld cert 1)) := by
       intro w hw
       simp only [Finset.mem_insert, Finset.mem_singleton] at hw
       rcases hw with rfl | rfl | rfl | rfl | rfl | rfl
@@ -623,8 +623,8 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
       · exact hcomm2 hu4 hv4
       · exact hcomm2 hu5 hv5
       · exact hcomm2 hu6 hv6
-    have hcard6 : ({qf p (fld cert 2), qf p (fld cert 3), qf p (fld cert 4),
-        qf p (fld cert 5), qf p (fld cert 6), qf p (fld cert 7)} : Finset E3).card = 6 := by
+    have hcard6 : ({qf8 p (fld cert 2), qf8 p (fld cert 3), qf8 p (fld cert 4),
+        qf8 p (fld cert 5), qf8 p (fld cert 6), qf8 p (fld cert 7)} : Finset E3).card = 6 := by
       rw [Finset.card_insert_of_notMem (by simp [hn12, hn13, hn14, hn15, hn16]),
         Finset.card_insert_of_notMem (by simp [hn23, hn24, hn25, hn26]),
         Finset.card_insert_of_notMem (by simp [hn34, hn35, hn36]),
@@ -644,16 +644,16 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
     obtain ⟨hc8, _, _⟩ := hqlt hcw1
     obtain ⟨_, hw28, _⟩ := hqlt haw2
     obtain ⟨_, hw38, _⟩ := hqlt haw3
-    have hsub : ({qf p (fld cert 3), qf p (fld cert 4), qf p (fld cert 5)} : Finset E3)
-        ⊆ neighbors X (qf p (fld cert 0)) ∩
-          (neighbors X (qf p (fld cert 1)) ∩ neighbors X (qf p (fld cert 2))) := by
+    have hsub : ({qf8 p (fld cert 3), qf8 p (fld cert 4), qf8 p (fld cert 5)} : Finset E3)
+        ⊆ neighbors X (qf8 p (fld cert 0)) ∩
+          (neighbors X (qf8 p (fld cert 1)) ∩ neighbors X (qf8 p (fld cert 2))) := by
       intro w hw
       simp only [Finset.mem_insert, Finset.mem_singleton] at hw
       rcases hw with rfl | rfl | rfl
       · exact Finset.mem_inter.mpr ⟨hmemN haw1, Finset.mem_inter.mpr ⟨hmemN hbw1, hmemN hcw1⟩⟩
       · exact Finset.mem_inter.mpr ⟨hmemN haw2, Finset.mem_inter.mpr ⟨hmemN hbw2, hmemN hcw2⟩⟩
       · exact Finset.mem_inter.mpr ⟨hmemN haw3, Finset.mem_inter.mpr ⟨hmemN hbw3, hmemN hcw3⟩⟩
-    have hcard3 : ({qf p (fld cert 3), qf p (fld cert 4), qf p (fld cert 5)} :
+    have hcard3 : ({qf8 p (fld cert 3), qf8 p (fld cert 4), qf8 p (fld cert 5)} :
         Finset E3).card = 3 := by
       rw [Finset.card_insert_of_notMem (by
           simp [hqne hw18 hw28 h12', hqne hw18 hw38 h13']),
@@ -671,8 +671,8 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
     have hm8 : ∀ t, t < 7 → fld cert t < 8 := fun t ht => hall1 t ht
     have hmne : ∀ t t', t < 7 → t' < t → fld cert t ≠ fld cert t' :=
       fun t t' ht ht' => hall2 t ht t' ht'
-    refine pattern_p1_impossible hX (c := qf p (fld cert 6))
-      (u := fun k : Fin 6 => qf p (fld cert k.val)) (hqmem _) (fun i => hqmem _)
+    refine pattern_p1_impossible hX (c := qf8 p (fld cert 6))
+      (u := fun k : Fin 6 => qf8 p (fld cert k.val)) (hqmem _) (fun i => hqmem _)
       ?_ ?_ (hqdist hs0) (hqdist hs1) (hqdist hs2) (hqdist hs3) (hqdist hs4) (hqdist hs5) (hqdist hs6) (hqdist hs7) (hqdist hs8)
     · intro a b hab
       by_contra hne
@@ -701,8 +701,8 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
     have hm8 : ∀ t, t < 7 → fld cert t < 8 := fun t ht => hall1 t ht
     have hmne : ∀ t t', t < 7 → t' < t → fld cert t ≠ fld cert t' :=
       fun t t' ht ht' => hall2 t ht t' ht'
-    refine pattern_p4_impossible hX (c := qf p (fld cert 6))
-      (u := fun k : Fin 6 => qf p (fld cert k.val)) (hqmem _) (fun i => hqmem _)
+    refine pattern_p4_impossible hX (c := qf8 p (fld cert 6))
+      (u := fun k : Fin 6 => qf8 p (fld cert k.val)) (hqmem _) (fun i => hqmem _)
       ?_ ?_ (hqdist hs0) (hqdist hs1) (hqdist hs2) (hqdist hs3) (hqdist hs4) (hqdist hs5) (hqdist hs6) (hqdist hs7) (hqdist hs8)
     · intro a b hab
       by_contra hne
@@ -731,8 +731,8 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
     have hm8 : ∀ t, t < 7 → fld cert t < 8 := fun t ht => hall1 t ht
     have hmne : ∀ t t', t < 7 → t' < t → fld cert t ≠ fld cert t' :=
       fun t t' ht ht' => hall2 t ht t' ht'
-    refine pattern_p5_impossible hX (c := qf p (fld cert 6))
-      (u := fun k : Fin 6 => qf p (fld cert k.val)) (hqmem _) (fun i => hqmem _)
+    refine pattern_p5_impossible hX (c := qf8 p (fld cert 6))
+      (u := fun k : Fin 6 => qf8 p (fld cert k.val)) (hqmem _) (fun i => hqmem _)
       ?_ (hqne (hm8 0 (by omega)) (hm8 6 (by omega))
         (hmne 6 0 (by omega) (by omega)).symm)
       (by rw [dist_comm]; exact hqdist hb0) (by rw [dist_comm]; exact hqdist hb1) (by rw [dist_comm]; exact hqdist hb2) (by rw [dist_comm]; exact hqdist hb3) (by rw [dist_comm]; exact hqdist hb4)
@@ -765,28 +765,28 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
     have hlnd' : le'.Nodup := by
       rw [hledef]
       exact hesnd.filter _
-    have hp1' : ∀ k ∈ le', ptn (i+1) k < 8 ∧ ptn (i+1) k ≠ i+1 ∧
-        dist (qf p (i+1)) (qf p (ptn (i+1) k)) = 1 := by
+    have hp1' : ∀ k ∈ le', ptn8 (i+1) k < 8 ∧ ptn8 (i+1) k ≠ i+1 ∧
+        dist (qf8 p (i+1)) (qf8 p (ptn8 (i+1) k)) = 1 := by
       intro k hkmem
       obtain ⟨hkes, hkinc⟩ := hlsub' k hkmem
       obtain ⟨hk28, hd⟩ := hes k hkes
       obtain ⟨hfs, hs8⟩ := pair_decode_lt k hk28
       by_cases hfeq : pairFst k = i+1
-      · refine ⟨by simp only [ptn, ite_eq_left hfeq]; omega,
-          by simp only [ptn, ite_eq_left hfeq]; omega, ?_⟩
-        simp only [ptn, ite_eq_left hfeq]
+      · refine ⟨by simp only [ptn8, ite_eq_left hfeq]; omega,
+          by simp only [ptn8, ite_eq_left hfeq]; omega, ?_⟩
+        simp only [ptn8, ite_eq_left hfeq]
         rw [← hfeq]
         exact hd
       · have hseq : pairSnd k = i+1 := by
           rcases hkinc with hc | hc
           · exact absurd hc hfeq
           · exact hc
-        refine ⟨by simp only [ptn, ite_eq_right hfeq]; omega,
-          by simp only [ptn, ite_eq_right hfeq]; exact hfeq, ?_⟩
-        simp only [ptn, ite_eq_right hfeq]
+        refine ⟨by simp only [ptn8, ite_eq_right hfeq]; omega,
+          by simp only [ptn8, ite_eq_right hfeq]; exact hfeq, ?_⟩
+        simp only [ptn8, ite_eq_right hfeq]
         rw [← hseq, dist_comm]
         exact hd
-    have hpinj2' : ∀ k ∈ le', ∀ k' ∈ le', ptn (i+1) k = ptn (i+1) k' → k = k' := by
+    have hpinj2' : ∀ k ∈ le', ∀ k' ∈ le', ptn8 (i+1) k = ptn8 (i+1) k' → k = k' := by
       intro k hkmem k' hkmem' hpp
       obtain ⟨hkes, hkinc⟩ := hlsub' k hkmem
       obtain ⟨hkes', hkinc'⟩ := hlsub' k' hkmem'
@@ -794,7 +794,7 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
       obtain ⟨hk28', _⟩ := hes k' hkes'
       obtain ⟨hlt, h8'⟩ := pair_decode_lt k hk28
       obtain ⟨hlt', h8''⟩ := pair_decode_lt k' hk28'
-      simp only [ptn] at hpp
+      simp only [ptn8] at hpp
       apply pair_decode_inj k hk28 k' hk28'
       all_goals
         rcases hkinc with hc | hc <;> rcases hkinc' with hc' | hc' <;>
@@ -805,22 +805,22 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
                ite_eq_right (by omega : ¬ pairFst k' = i+1)] at hpp) ] <;>
         omega
     have hTcard' : le'.toFinset.card = le'.length := List.toFinset_card_of_nodup hlnd'
-    have hlow : le'.length ≤ (neighbors X (qf p (i+1))).card := by
-      have hsubn : le'.toFinset.image (fun k => qf p (ptn (i+1) k))
-          ⊆ neighbors X (qf p (i+1)) := by
+    have hlow : le'.length ≤ (neighbors X (qf8 p (i+1))).card := by
+      have hsubn : le'.toFinset.image (fun k => qf8 p (ptn8 (i+1) k))
+          ⊆ neighbors X (qf8 p (i+1)) := by
         intro w hw
         obtain ⟨k, hkmem, rfl⟩ := Finset.mem_image.mp hw
         rw [List.mem_toFinset] at hkmem
         obtain ⟨_, _, hd⟩ := hp1' k hkmem
         exact Finset.mem_filter.mpr ⟨hqmem _, hd⟩
-      have hcardim : (le'.toFinset.image (fun k => qf p (ptn (i+1) k))).card
+      have hcardim : (le'.toFinset.image (fun k => qf8 p (ptn8 (i+1) k))).card
           = le'.length := by
         rw [Finset.card_image_of_injOn, hTcard']
         intro k hk k' hk' heq
         rw [Finset.mem_coe, List.mem_toFinset] at hk hk'
         obtain ⟨hlt8, _, _⟩ := hp1' k hk
         obtain ⟨hlt8', _, _⟩ := hp1' k' hk'
-        by_cases hpe : ptn (i+1) k = ptn (i+1) k'
+        by_cases hpe : ptn8 (i+1) k = ptn8 (i+1) k'
         · exact hpinj2' k hk k' hk' hpe
         · exact absurd heq (hqne hlt8 hlt8' hpe).elim
       calc le'.length = _ := hcardim.symm
@@ -837,30 +837,30 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
     have hlnnd : ln.Nodup := by
       rw [hlndef]
       exact hnsnd.filter _
-    have hp1n : ∀ k ∈ ln, ptn i k < 8 ∧ ptn i k ≠ i ∧
-        ¬ dist (qf p i) (qf p (ptn i k)) = 1 := by
+    have hp1n : ∀ k ∈ ln, ptn8 i k < 8 ∧ ptn8 i k ≠ i ∧
+        ¬ dist (qf8 p i) (qf8 p (ptn8 i k)) = 1 := by
       intro k hkmem
       obtain ⟨hkns, hkinc⟩ := hlsub k hkmem
       obtain ⟨hk28, hnd⟩ := hns k hkns
       obtain ⟨hfs, hs8⟩ := pair_decode_lt k hk28
       by_cases hfeq : pairFst k = i
-      · refine ⟨by simp only [ptn, ite_eq_left hfeq]; omega,
-          by simp only [ptn, ite_eq_left hfeq]; omega, ?_⟩
-        simp only [ptn, ite_eq_left hfeq]
+      · refine ⟨by simp only [ptn8, ite_eq_left hfeq]; omega,
+          by simp only [ptn8, ite_eq_left hfeq]; omega, ?_⟩
+        simp only [ptn8, ite_eq_left hfeq]
         rw [← hfeq]
         exact hnd
       · have hseq : pairSnd k = i := by
           rcases hkinc with hc | hc
           · exact absurd hc hfeq
           · exact hc
-        refine ⟨by simp only [ptn, ite_eq_right hfeq]; omega,
-          by simp only [ptn, ite_eq_right hfeq]; exact hfeq, ?_⟩
-        simp only [ptn, ite_eq_right hfeq]
+        refine ⟨by simp only [ptn8, ite_eq_right hfeq]; omega,
+          by simp only [ptn8, ite_eq_right hfeq]; exact hfeq, ?_⟩
+        simp only [ptn8, ite_eq_right hfeq]
         intro hd
         apply hnd
         rw [← hseq, dist_comm] at hd
         exact hd
-    have hpinj2n : ∀ k ∈ ln, ∀ k' ∈ ln, ptn i k = ptn i k' → k = k' := by
+    have hpinj2n : ∀ k ∈ ln, ∀ k' ∈ ln, ptn8 i k = ptn8 i k' → k = k' := by
       intro k hkmem k' hkmem' hpp
       obtain ⟨hkns, hkinc⟩ := hlsub k hkmem
       obtain ⟨hkns', hkinc'⟩ := hlsub k' hkmem'
@@ -868,7 +868,7 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
       obtain ⟨hk28', _⟩ := hns k' hkns'
       obtain ⟨hlt, h8'⟩ := pair_decode_lt k hk28
       obtain ⟨hlt', h8''⟩ := pair_decode_lt k' hk28'
-      simp only [ptn] at hpp
+      simp only [ptn8] at hpp
       apply pair_decode_inj k hk28 k' hk28'
       all_goals
         rcases hkinc with hc | hc <;> rcases hkinc' with hc' | hc' <;>
@@ -878,18 +878,18 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
           (rw [ite_eq_right (by omega : ¬ pairFst k = i),
                ite_eq_right (by omega : ¬ pairFst k' = i)] at hpp) ] <;>
         omega
-    have hup : (neighbors X (qf p i)).card + ln.length ≤ 7 := by
-      set PS : Finset E3 := ln.toFinset.image (fun k => qf p (ptn i k)) with hPS
+    have hup : (neighbors X (qf8 p i)).card + ln.length ≤ 7 := by
+      set PS : Finset E3 := ln.toFinset.image (fun k => qf8 p (ptn8 i k)) with hPS
       have hPScard : PS.card = ln.length := by
         rw [hPS, Finset.card_image_of_injOn, List.toFinset_card_of_nodup hlnnd]
         intro k hk k' hk' heq
         rw [Finset.mem_coe, List.mem_toFinset] at hk hk'
         obtain ⟨hlt8, _, _⟩ := hp1n k hk
         obtain ⟨hlt8', _, _⟩ := hp1n k' hk'
-        by_cases hpe : ptn i k = ptn i k'
+        by_cases hpe : ptn8 i k = ptn8 i k'
         · exact hpinj2n k hk k' hk' hpe
         · exact absurd heq (hqne hlt8 hlt8' hpe).elim
-      have hPSdisj : ∀ w ∈ PS, w ∈ X.erase (qf p i) ∧ w ∉ neighbors X (qf p i) := by
+      have hPSdisj : ∀ w ∈ PS, w ∈ X.erase (qf8 p i) ∧ w ∉ neighbors X (qf8 p i) := by
         intro w hw
         rw [hPS] at hw
         obtain ⟨k, hk, rfl⟩ := Finset.mem_image.mp hw
@@ -898,7 +898,7 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
         refine ⟨Finset.mem_erase.mpr ⟨hqne hlt8 (by omega) hnev, hqmem _⟩, ?_⟩
         intro hmem
         exact hnd (Finset.mem_filter.mp hmem).2
-      have hunion : neighbors X (qf p i) ∪ PS ⊆ X.erase (qf p i) := by
+      have hunion : neighbors X (qf8 p i) ∪ PS ⊆ X.erase (qf8 p i) := by
         intro w hw
         rcases Finset.mem_union.mp hw with hw | hw
         · exact Finset.mem_erase.mpr ⟨fun h => by
@@ -906,22 +906,22 @@ theorem checkCert_sound {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
             rw [h, dist_self] at this
             norm_num at this, (Finset.mem_filter.mp hw).1⟩
         · exact (hPSdisj w hw).1
-      have hdisj : Disjoint (neighbors X (qf p i)) PS := by
+      have hdisj : Disjoint (neighbors X (qf8 p i)) PS := by
         rw [Finset.disjoint_right]
         intro w hw
         exact (hPSdisj w hw).2
-      have hcard7 : (X.erase (qf p i)).card = 7 := by
+      have hcard7 : (X.erase (qf8 p i)).card = 7 := by
         rw [Finset.card_erase_of_mem (hqmem i), h8]
       have hle := Finset.card_le_card hunion
       rw [Finset.card_union_of_disjoint hdisj, hPScard] at hle
       omega
     -- degree sortedness contradicts the two bounds
-    have hqi : qf p i = p ⟨i, by omega⟩ := by
-      simp only [qf]
+    have hqi : qf8 p i = p ⟨i, by omega⟩ := by
+      simp only [qf8]
       congr 1
       exact Fin.ext (Nat.mod_eq_of_lt (by omega))
-    have hqi1 : qf p (i+1) = p ⟨i+1, by omega⟩ := by
-      simp only [qf]
+    have hqi1 : qf8 p (i+1) = p ⟨i+1, by omega⟩ := by
+      simp only [qf8]
       congr 1
       exact Fin.ext (Nat.mod_eq_of_lt (by omega))
     have hs := hsort ⟨i, by omega⟩ ⟨i+1, by omega⟩ (by
@@ -952,8 +952,8 @@ theorem walk_impossible {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
     (hsort : ∀ i j : Fin 8, i ≤ j → (neighbors X (p j)).card ≤ (neighbors X (p i)).card) :
     ∀ (fuel : ℕ) (data : List ℕ) (k : ℕ) (es ns rest : List ℕ),
     walk fuel data k es ns = some rest →
-    (∀ i ∈ es, i < 28 ∧ dist (qf p (pairFst i)) (qf p (pairSnd i)) = 1) →
-    (∀ i ∈ ns, i < 28 ∧ ¬ dist (qf p (pairFst i)) (qf p (pairSnd i)) = 1) →
+    (∀ i ∈ es, i < 28 ∧ dist (qf8 p (pairFst i)) (qf8 p (pairSnd i)) = 1) →
+    (∀ i ∈ ns, i < 28 ∧ ¬ dist (qf8 p (pairFst i)) (qf8 p (pairSnd i)) = 1) →
     es.Nodup → ns.Nodup → (∀ i ∈ es, i < k) → (∀ i ∈ ns, i < k) → False := by
   intro fuel
   induction fuel with
@@ -978,7 +978,7 @@ theorem walk_impossible {X : Finset E3} (hX : HardCore X) {p : Fin 8 → E3}
       · rw [ite_eq_left hc] at hwalk
         by_cases hklt : k < 28
         · rw [ite_eq_left hklt] at hwalk
-          by_cases hbond : dist (qf p (pairFst k)) (qf p (pairSnd k)) = 1
+          by_cases hbond : dist (qf8 p (pairFst k)) (qf8 p (pairSnd k)) = 1
           · cases hw : walk fuel rest' (k + 1) (k :: es) ns with
             | none => rw [hw] at hwalk; simp at hwalk
             | some rest2 =>
